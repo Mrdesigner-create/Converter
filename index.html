@@ -4,97 +4,194 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>All-in-One-Converter </title>
+
+  <!--
+    Styling (CSS)
+    - This block contains the complete styling for the page.
+    - I left your visual design intact (colors, spacing, layout).
+    - Comments explain what each major block does and why.
+    - Note (advanced): we keep some CSS shorthand for brevity but explain intent.
+  -->
   <style>
-    :root{--bg1:#87CEEB;--bg2:#ff4b2b;--accent:#5eead4;--text:#f8f5f6}
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu;background:linear-gradient(135deg,var(--bg1),var(--bg2));color:var(--text);transition:background 0.45s}
-    body.bg-image{background:url('https://mrdesigner-create.github.io/photoes/Beautiful-Rose.jpg') center/cover no-repeat fixed}
-    header{padding:32px 16px;text-align:center}
-    h1{margin:0 0 8px;font-size:clamp(24px,3.3vw,38px)}
-    .subtitle{opacity:.9}
-    .wrap{max-width:1100px;margin:0 auto;padding:0 16px 64px}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
-    .card{background:rgba(0,0,0,.3);border-radius:14px;padding:14px;box-shadow:0 8px 24px rgba(0,0,0,.3)}
-    .card h3{margin:4px 0 12px 0}
-    .dropzone{width:100%;padding:12px;border:2px dashed rgba(255,255,255,.3);border-radius:12px;text-align:center;cursor:pointer;user-select:none}
-    .dropzone.dragover{border-color:var(--accent);background:rgba(94,234,212,.08)}
-    input[type=file]{display:none}
-    button{cursor:pointer;border:none;padding:10px 14px;border-radius:12px;background:var(--accent);color:#06161a;font-weight:700;margin-top:5px}
-    button.secondary{background:#94a3b8;color:#0b1020}
-    .file-list{margin-top:10px;font-size:13px;max-height:140px;overflow:auto;background:rgba(0,0,0,.2);padding:8px;border-radius:8px}
-    .file-item{display:flex;justify-content:space-between;padding:6px;border-bottom:1px solid rgba(255,255,255,.08);align-items:center}
-    .file-item .meta{max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .overlay{position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:9999}
-    .overlay.open{display:flex}
-    .overlay .box{background:white;color:black;width:210mm;height:297mm;max-width:95%;max-height:90%;overflow:auto;padding:18px;border-radius:12px;box-shadow:0 0 20px rgba(0,0,0,.4)}
-    .overlay h2{margin-top:0}
-    .toggle-bg{position:fixed;top:10px;right:10px;padding:8px 14px;background:var(--accent);border-radius:8px;font-weight:700;cursor:pointer;z-index:10000;color:#111}
-    .preview-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
-    .preview-card{width:150px;background:#fafafa;border-radius:8px;padding:8px;box-shadow:0 4px 12px rgba(0,0,0,.06);text-align:center;cursor:grab;color:#111}
-    .preview-card.dragging{opacity:.5}
-    .preview-card img{max-width:100%;max-height:90px;display:block;margin:0 auto 6px}
-    .preview-card canvas{max-width:100%;height:auto;display:block;margin:0 auto 6px}
-    .preview-actions{display:flex;gap:8px;justify-content:center;margin-top:6px}
-    .muted{color:#666;font-size:13px}
-    .light-list{margin-top:12px}
-    .list-row{display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid #eee;background:#fff;border-radius:4px;margin-bottom:6px;align-items:center}
-    .drag-handle{cursor:grab;padding:6px;background:#eee;border-radius:6px;margin-right:8px}
-    .controls{display:flex;gap:12px;align-items:center;margin-top:12px;flex-wrap:wrap}
-    .control-group{background:#f7f7f7;padding:8px;border-radius:8px;color:#111}
-    .slider{width:160px}
-    .small{font-size:13px}
-    .badge{display:inline-flex;gap:6px;align-items:center;padding:4px 8px;border-radius:999px;background:rgba(94,234,212,.15);color:var(--accent);font-size:12px;font-weight:700}
-    .hint{font-size:12px;opacity:.9}
-    .notice{font-size:12px;margin-top:6px}
-    .success{color:#86efac}
-    .error{color:#fca5a5}
+    /* Root color variables. These let you change theme easily. */
+    :root{
+      --bg1:#87CEEB;   /* sky-blue gradient start */
+      --bg2:#ff4b2b;   /* orange gradient end */
+      --accent:#5eead4;/* mint accent color used for buttons */
+      --text:#f8f5f6;  /* default text color */
+    }
 
-    /* image editor modal inside overlay.box */
-    #imgEditor{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:11000;background:white;color:#111;padding:12px;border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,.6);display:none;width:min(880px,95%);max-height:90%;overflow:auto}
-    #imgEditor .editor-row{display:flex;gap:12px}
-    #imgEditor canvas{border:1px solid #ddd;background:#fff;max-width:100%;}
-    #imgEditor .controls{flex-direction:column;min-width:220px}
-    .crop-rect{position:absolute;border:2px dashed rgba(0,0,0,.6);pointer-events:none}
+    /* Box sizing: makes width/height easier to reason about */
+    *{ box-sizing: border-box; }
 
-  
-   
+    /* Base page styles */
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu;
+      /* gradient background using variables above */
+      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+      color: var(--text);
+      transition: background 0.45s;
+    }
 
-/* footer Make the page wrapper take full height */
-html, body {
-    height: 100%;
-    margin: 0;
-}
+    /* Optional full-photo background toggle; class 'bg-image' adds an image */
+    body.bg-image{
+      background: url('https://mrdesigner-create.github.io/photoes/Beautiful-Rose.jpg') center/cover no-repeat fixed;
+    }
 
-.page-wrapper {
-    min-height: 100%;
-    display: flex;
-    flex-direction: column;
-}
+    /* Header spacing and text sizing */
+    header{ padding: 32px 16px; text-align:center; }
+    h1{ margin: 0 0 8px; font-size: clamp(24px, 3.3vw, 38px); }
 
-/* Main content grows to fill space */
-.wrap {
-    flex: 1;
-}
+    .subtitle{ opacity: .9; }
 
-/* Footer at the bottom */
-.page-footer {
-    background-color: skyblue;  /* readable color */
-    color: darkblue;
-    text-align: center;
-    padding: 10px 10px;
-    font-size: 12px;
-    border-top: 2px solid darkblue;
-}
+    /* Main page wrapper width and padding */
+    .wrap{ max-width: 1100px; margin: 0 auto; padding: 0 16px 64px; }
 
+    /* Responsive grid: cards flow and wrap, min-width 300px */
+    .grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:18px; }
 
-  
-  
-  
-  
-  
+    /* Card style: semi-transparent dark card with rounded corners and shadow */
+    .card{
+      background: rgba(0,0,0,.3);
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.3);
+    }
+    .card h3{ margin:4px 0 12px 0; }
+
+    /* Dropzone UI element for file picking or drag/drop */
+    .dropzone{
+      width:100%;
+      padding:12px;
+      border:2px dashed rgba(255,255,255,.3);
+      border-radius:12px;
+      text-align:center;
+      cursor:pointer;
+      user-select:none;
+    }
+    .dropzone.dragover{ border-color: var(--accent); background: rgba(94,234,212,.08); }
+
+    /* Native file input is hidden (we click label to open it) */
+    input[type=file]{ display:none; }
+
+    /* Primary buttons */
+    button{
+      cursor:pointer;
+      border:none;
+      padding:10px 14px;
+      border-radius:12px;
+      background: var(--accent);
+      color:#06161a;
+      font-weight:700;
+      margin-top:5px;
+    }
+    /* Secondary (muted) button */
+    button.secondary{ background:#94a3b8; color:#0b1020; }
+
+    /* File list area inside each card */
+    .file-list{
+      margin-top:10px;
+      font-size:13px;
+      max-height:140px;
+      overflow:auto;
+      background: rgba(0,0,0,.2);
+      padding:8px;
+      border-radius:8px;
+    }
+    .file-item{ display:flex; justify-content:space-between; padding:6px; border-bottom:1px solid rgba(255,255,255,.08); align-items:center; }
+    .file-item .meta{ max-width:60%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+    /* Fullscreen overlay used when user clicks 'Fullscreen' button */
+    .overlay{
+      position:fixed; left:0; top:0; width:100%; height:100%;
+      background: rgba(0,0,0,.7);
+      display:none; align-items:center; justify-content:center; z-index:9999;
+    }
+    .overlay.open{ display:flex; }
+    .overlay .box{
+      background:white; color:black;
+      width:210mm; height:297mm; /* A4 size in CSS; used for a print-like canvas */
+      max-width:95%; max-height:90%; overflow:auto;
+      padding:18px; border-radius:12px; box-shadow:0 0 20px rgba(0,0,0,.4);
+    }
+    .overlay h2{ margin-top:0; }
+
+    /* Toggle background button in top-right */
+    .toggle-bg{
+      position:fixed; top:10px; right:10px; padding:8px 14px;
+      background:var(--accent); border-radius:8px; font-weight:700; cursor:pointer;
+      z-index:10000; color:#111;
+    }
+
+    /* Preview thumbnails row */
+    .preview-row{ display:flex; gap:12px; flex-wrap:wrap; margin-top:12px; }
+    .preview-card{
+      width:150px; background:#fafafa; border-radius:8px; padding:8px;
+      box-shadow:0 4px 12px rgba(0,0,0,.06); text-align:center; cursor:grab; color:#111;
+    }
+    .preview-card.dragging{ opacity:.5; }
+    .preview-card img{ max-width:100%; max-height:90px; display:block; margin:0 auto 6px; }
+    .preview-card canvas{ max-width:100%; height:auto; display:block; margin:0 auto 6px; }
+    .preview-actions{ display:flex; gap:8px; justify-content:center; margin-top:6px; }
+
+    /* Minor helper classes */
+    .muted{ color:#666; font-size:13px; }
+    .light-list{ margin-top:12px; }
+    .list-row{
+      display:flex; justify-content:space-between; padding:8px;
+      border-bottom:1px solid #eee; background:#fff; border-radius:4px; margin-bottom:6px; align-items:center;
+    }
+    .drag-handle{ cursor:grab; padding:6px; background:#eee; border-radius:6px; margin-right:8px; }
+    .controls{ display:flex; gap:12px; align-items:center; margin-top:12px; flex-wrap:wrap; }
+    .control-group{ background:#f7f7f7; padding:8px; border-radius:8px; color:#111; }
+    .slider{ width:160px; }
+    .small{ font-size:13px; }
+    .badge{ display:inline-flex; gap:6px; align-items:center; padding:4px 8px; border-radius:999px; background:rgba(94,234,212,.15); color:var(--accent); font-size:12px; font-weight:700; }
+    .hint{ font-size:12px; opacity:.9; }
+    .notice{ font-size:12px; margin-top:6px; }
+    .success{ color:#86efac; }
+    .error{ color:#fca5a5; }
+
+    /* Image editor modal styles (inside the overlay box) */
+    #imgEditor{
+      position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
+      z-index:11000; background:white; color:#111; padding:12px; border-radius:8px;
+      box-shadow:0 8px 30px rgba(0,0,0,.6);
+      display:none; width:min(880px,95%); max-height:90%; overflow:auto;
+    }
+    #imgEditor .editor-row{ display:flex; gap:12px; }
+    #imgEditor canvas{ border:1px solid #ddd; background:#fff; max-width:100%; }
+    #imgEditor .controls{ flex-direction:column; min-width:220px; }
+    .crop-rect{ position:absolute; border:2px dashed rgba(0,0,0,.6); pointer-events:none; }
+
+    /* Footer layout rules — keep page height and push footer to bottom */
+    html, body { height: 100%; margin: 0; }
+    .page-wrapper { min-height: 100%; display: flex; flex-direction: column; }
+    .wrap { flex: 1; } /* allow main content to grow */
+    .page-footer {
+      background-color: skyblue;
+      color: darkblue;
+      text-align:center;
+      padding:10px 10px;
+      font-size:12px;
+      border-top: 2px solid darkblue;
+    }
   </style>
 
-  <!-- Libraries -->
+  <!--
+    JavaScript libraries (CDNs)
+    - FileSaver.js (save files client-side)
+    - pdf-lib (create/manipulate PDF)
+    - pdf.js (read PDFs in browser)
+    - docx (generate Word .docx files)
+    - mammoth (docx -> html/text extraction)
+    - xlsx (read/write Excel)
+    - pdfmake (generate PDF from JS structures)
+    Notes:
+      * pdfjsLib.GlobalWorkerOptions.workerSrc config is required to make pdf.js work.
+      * Using CDNs means browser needs internet to fetch libs the first time.
+  -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
@@ -105,24 +202,29 @@ html, body {
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 </head>
+
 <body class="bg-image">
+  <!-- Toggle background image button -->
   <div class="toggle-bg" id="toggleBgBtn">🌅 Hide / Show Background</div>
+
+  <!-- Header: title and subtitle (kept same) -->
   <header style="color: darkred;">
-    
-    <h1 <h1 style="color: darkred;">All-in-One Converter</h1>
+    <h1 h1 style="color: darkred;">All-in-One Converter</h1>
     <div class="subtitle">Combine PDFs and convert between PDF ↔ Word ↔ Excel (and Images)</div>
   </header>
 
+  <!-- Main wrapper and grid container -->
   <div class="wrap">
     <div class="grid" id="converterGrid"></div>
     <p style="text-align:center;opacity:.9;margin-top:30px">⚡ Fast client-side converter</p>
   </div>
 
-  <!-- Fullscreen overlay (A4) -->
+  <!-- Fullscreen overlay (A4-sized dialog) used to preview files and run conversion -->
   <div class="overlay" id="fullscreenOverlay" aria-hidden="true">
     <div class="box" role="dialog" aria-modal="true">
       <h2 id="overlayTitle"></h2>
 
+      <!-- Top action row inside overlay: file count + buttons -->
       <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap">
         <div class="muted" id="overlayCount">0 files</div>
         <div style="display:flex;gap:8px">
@@ -133,7 +235,7 @@ html, body {
         </div>
       </div>
 
-      <!-- image controls (show only for imgmerge) -->
+      <!-- Image-specific controls: only shown for image merging -->
       <div id="imageControls" style="margin-top:12px;display:none">
         <div class="controls">
           <div class="control-group small">
@@ -163,15 +265,14 @@ html, body {
         </div>
       </div>
 
+      <!-- Dropzone and preview area inside overlay -->
       <div id="overlayDrop" class="dropzone" style="margin-top:12px;">Drop files here to add (or click). Paste (Ctrl+V) images to add.</div>
-
       <div id="overlayPreview" class="preview-row"></div>
-
       <div id="postMsg" style="margin-top:12px"></div>
     </div>
   </div>
 
-  <!-- Image editor modal -->
+  <!-- Image editor modal (crop/resize/filters) -->
   <div id="imgEditor" role="dialog" aria-modal="true">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <strong>Image Editor</strong>
@@ -205,36 +306,42 @@ html, body {
     </div>
   </div>
 
-
-
-
-
+  <!-- Footer: kept same -->
   <footer class="page-footer">
     <div class="footer-content">
-      <b><p>© 2025 Your Website Name. All-in-One-Converter. Made with ❤️ for fast client-side conversion.</p>
-    </b>
-	
-	</div>
+      <b><p>© 2025 Your Website Name. All-in-One-Converter. Made with ❤️ for fast client-side conversion.</p></b>
+    </div>
   </footer>
-</div>
 
-
-
-
-
-
-
-
+  <!--
+    JavaScript logic
+    - Major concerns: file selection UI, overlay preview, conversion functions (pdf->docx, docx->pdf, xlsx->pdf, etc.)
+    - Comments explain the purpose and internals of each function and variable.
+    - I avoided commenting obvious one-line things excessively, but covered every block with advanced-level notes.
+  -->
 <script>
-/* ---------- core setup ---------- */
+/* ---------- core setup: prevent default browser drag/drop behavior ---------- */
+/*
+  We block the default behavior for drag events across the window to allow
+  custom handling inside dropzones. This prevents the browser from opening files.
+*/
 ['dragenter','dragover','dragleave','drop'].forEach(ev => {
   window.addEventListener(ev, (e) => {
-    if(e.target && (e.target.tagName === 'INPUT' || e.target.closest && e.target.closest('input'))) return;
+    // allow file inputs to receive their native events (don't block clicks inside actual inputs)
+    if (e.target && (e.target.tagName === 'INPUT' || (e.target.closest && e.target.closest('input')))) return;
     e.preventDefault();
     e.stopPropagation();
   }, { passive:false });
 });
 
+/* ---------- converter definitions (UI data model) ---------- */
+/*
+  Each converter entry defines:
+  - id: used as element id prefix (e.g., 'mergeFiles', 'mergeList')
+  - label: human label for the card
+  - accept: file input accept attribute
+  The grid UI is generated from this array (single source of truth).
+*/
 const converters = [
   {id:'merge',label:'Combine / Merge PDFs',accept:'.pdf'},
   {id:'pdf2docx',label:'PDF → Word (.docx)',accept:'.pdf'},
@@ -246,6 +353,9 @@ const converters = [
   {id:'imgmerge',label:'Images → Merge (PDF)',accept:'image/*'}
 ];
 
+/* Insert the converter cards into the grid DOM element.
+   This keeps the HTML source smaller and centralizes card definitions.
+*/
 const grid = document.getElementById('converterGrid');
 converters.forEach(c=>{
   grid.insertAdjacentHTML('beforeend', `
@@ -265,29 +375,51 @@ converters.forEach(c=>{
   `);
 });
 
+/* ---------- small DOM helper utilities ---------- */
+/* Simple get-by-id helper */
 function byId(id){ return document.getElementById(id); }
+
+/* Escape HTML to avoid injection in lists and messages */
 function escapeHtml(s){ return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+
+/* Update the visible file list for a given card. Shows filename and a remove button. */
 function setListFromInput(id){
-  const input = byId(id+'Files'); const list = byId(id+'List');
+  const input = byId(id+'Files');
+  const list = byId(id+'List');
   const files = Array.from(input.files || []);
-  if(!files.length){ list.innerHTML='No file selected'; return; }
+  if(!files.length){
+    list.innerHTML='No file selected';
+    return;
+  }
+  // Map the files to list rows (index used to remove specific one)
   list.innerHTML = files.map((f,i)=>`<div class="file-item"><div class="meta">${i+1}. ${escapeHtml(f.name)}</div><div><button class="secondary" data-remove="${id}" data-index="${i}">Remove</button></div></div>`).join('');
 }
 
+/* ---------- wire up dropzone, choose and clear behavior for each converter card ---------- */
 converters.forEach(c=>{
-  const drop = byId(c.id+'Drop'); const input = byId(c.id+'Files');
+  const drop = byId(c.id+'Drop');
+  const input = byId(c.id+'Files');
+
+  /* When user clicks dropzone label, open file picker (but not when clicking the inner Choose button) */
   drop.addEventListener('click', e=>{
     if(e.target && e.target.getAttribute && e.target.getAttribute('data-click')==='choose') return;
     input.click();
   });
+
+  /* Choose button opens native file picker — stops propagation so label click doesn't re-open */
   const chooseBtn = drop.querySelector('button[data-click="choose"]');
   chooseBtn.addEventListener('click', (e)=> { e.stopPropagation(); byId(e.target.getAttribute('data-input')).click(); });
+
+  /* Add nice dragover visual when file is dragged over the drop area */
   ['dragenter','dragover'].forEach(ev=> drop.addEventListener(ev, e=>{ e.preventDefault(); e.stopPropagation(); drop.classList.add('dragover'); }, {passive:false}));
   ['dragleave','dragend','drop'].forEach(ev=> drop.addEventListener(ev, e=>{ e.preventDefault(); e.stopPropagation(); drop.classList.remove('dragover'); }, {passive:false}));
+
+  /* When files are dropped into the dropzone, merge dropped items into existing input.files */
   drop.addEventListener('drop', e=>{
     const dt = new DataTransfer();
-    Array.from(input.files || []).forEach(f => dt.items.add(f));
+    Array.from(input.files || []).forEach(f => dt.items.add(f)); // keep existing files
     Array.from(e.dataTransfer.files || []).forEach(f => {
+      // restrict to images only for imgmerge
       if(c.id === 'imgmerge'){
         if(f.type && f.type.startsWith('image/')) dt.items.add(f);
       } else {
@@ -297,21 +429,30 @@ converters.forEach(c=>{
     input.files = dt.files;
     setListFromInput(c.id);
   });
+
+  /* When native input changes (user picked files), update list display */
   input.addEventListener('change', ()=> setListFromInput(c.id));
+
+  /* Clear button empties the file input and updates UI */
   const clearBtn = document.querySelector(`[data-clear="${c.id}"]`);
   if(clearBtn) clearBtn.addEventListener('click', ()=>{ input.value=''; setListFromInput(c.id); });
 });
 
+/* Remove single file from input when clicking 'Remove' in file-list */
 document.addEventListener('click', (e)=>{
   const rem = e.target.closest('button[data-remove]');
   if(!rem) return;
-  const idBase = rem.getAttribute('data-remove'); const index = Number(rem.getAttribute('data-index'));
-  const input = byId(idBase+'Files'); const dt = new DataTransfer();
+  const idBase = rem.getAttribute('data-remove');
+  const index = Number(rem.getAttribute('data-index'));
+  const input = byId(idBase+'Files');
+  const dt = new DataTransfer();
   Array.from(input.files || []).forEach((f,i)=>{ if(i!==index) dt.items.add(f); });
-  input.files = dt.files; setListFromInput(idBase);
+  input.files = dt.files;
+  setListFromInput(idBase);
 });
 
-/* ---------- overlay & preview logic ---------- */
+/* ---------- overlay & preview state and helpers ---------- */
+/* Cached DOM for overlay controls */
 const overlay = byId('fullscreenOverlay'), overlayTitle = byId('overlayTitle'), overlayCount = byId('overlayCount');
 const overlayDrop = byId('overlayDrop'), overlayPreview = byId('overlayPreview');
 const submitBtn = byId('submitBtn'), downloadBtn = byId('downloadBtn'), printBtn = byId('printBtn'), closeBtn = byId('closeBtn'), postMsg = byId('postMsg');
@@ -319,42 +460,62 @@ const imageControls = byId('imageControls');
 const paperSizeEl = byId('paperSize'), customW = byId('customW'), customH = byId('customH');
 const brightnessEl = byId('brightness'), contrastEl = byId('contrast'), bval = byId('bval'), cval = byId('cval');
 
+/* activeSection holds the id of current converter shown in overlay (e.g., 'merge', 'pdf2docx') */
 let activeSection = null;
-let lastResult = null;
+let lastResult = null; // store last conversion result { blob, filename, mime }
 
-// image edits map: key = filename + '__' + lastModified
+/* imageEdits is a map that stores per-image edits (crop/resize/filters).
+   Key format: filename + '__' + lastModified
+   This allows editing multiple images before merging.
+*/
 const imageEdits = new Map();
 
+/* openFullscreen: show overlay for chosen converter section */
 function openFullscreen(sectionId){
   activeSection = sectionId;
   overlayTitle.textContent = document.querySelector('#'+sectionId+' h3').textContent;
   overlayCount.textContent = (byId(sectionId+'Files').files.length || 0) + ' files';
-  lastResult = null; downloadBtn.style.display='none'; printBtn.style.display='none'; postMsg.innerHTML='';
-  imageControls.style.display = (sectionId === 'imgmerge') ? '' : 'none';
-  renderOverlayPreviewFromInput();
+  lastResult = null;
+  downloadBtn.style.display='none';
+  printBtn.style.display='none';
+  postMsg.innerHTML='';
+  imageControls.style.display = (sectionId === 'imgmerge') ? '' : 'none'; // show image controls only for imgmerge
+  renderOverlayPreviewFromInput(); // build preview thumbnails / list
   overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false');
 }
+
+/* wire fullscreen button for each card */
 document.querySelectorAll('[data-full]').forEach(btn=> btn.addEventListener('click', ()=> openFullscreen(btn.getAttribute('data-full')) ));
+
+/* close overlay */
 function closeFullscreen(){ overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); activeSection=null; }
 closeBtn.addEventListener('click', closeFullscreen);
 
+/* overlay drop handlers: allow adding files into overlay as well */
 ['dragenter','dragover'].forEach(ev=> overlayDrop.addEventListener(ev, e=>{ e.preventDefault(); overlayDrop.classList.add('dragover'); }, {passive:false}));
 ['dragleave','dragend','drop'].forEach(ev=> overlayDrop.addEventListener(ev, e=>{ e.preventDefault(); overlayDrop.classList.remove('dragover'); }, {passive:false}));
 
+/* click overlay drop to open the file input for active section */
 overlayDrop.addEventListener('click', ()=> { if(!activeSection) return; byId(activeSection+'Files').click(); });
 
+/* drop on overlay: merge dropped files into current active section input */
 overlayDrop.addEventListener('drop', e=>{
-  e.preventDefault(); overlayDrop.classList.remove('dragover'); if(!activeSection) return;
-  const input = byId(activeSection+'Files'); const dt = new DataTransfer();
+  e.preventDefault();
+  overlayDrop.classList.remove('dragover');
+  if(!activeSection) return;
+  const input = byId(activeSection+'Files');
+  const dt = new DataTransfer();
   Array.from(input.files || []).forEach(f=> dt.items.add(f));
   Array.from(e.dataTransfer.files || []).forEach(f=>{
     if(activeSection === 'imgmerge'){
       if(f.type && f.type.startsWith('image/')) dt.items.add(f);
     } else dt.items.add(f);
   });
-  input.files = dt.files; setListFromInput(activeSection); renderOverlayPreviewFromInput(); overlayCount.textContent = (input.files.length || 0) + ' files';
+  input.files = dt.files; setListFromInput(activeSection); renderOverlayPreviewFromInput();
+  overlayCount.textContent = (input.files.length || 0) + ' files';
 });
 
+/* paste event: allow Ctrl+V of images into overlay (clipboard images) */
 document.addEventListener('paste', (e)=>{
   if(!activeSection) return;
   const items = Array.from(e.clipboardData?.items || []);
@@ -367,22 +528,32 @@ document.addEventListener('paste', (e)=>{
   input.files = dt.files; setListFromInput(activeSection); renderOverlayPreviewFromInput(); overlayCount.textContent = (input.files.length || 0) + ' files';
 });
 
+/* when any converter input changes, update overlay preview if it's the active section */
 converters.forEach(c=> byId(c.id+'Files').addEventListener('change', ()=>{ setListFromInput(c.id); if(activeSection === c.id) renderOverlayPreviewFromInput(); }));
 
 /* ---------- render overlay preview (thumbnails or lightweight list) ---------- */
+/*
+  renderOverlayPreviewFromInput:
+  - For a small number of files we show thumbnails (images & first page of PDFs).
+  - For a huge number of files we show a compact textual list to keep UI responsive.
+  - Thumbnails use object URLs and pdf.js page render for PDF preview.
+*/
 async function renderOverlayPreviewFromInput(){
   overlayPreview.innerHTML=''; postMsg.innerHTML=''; lastResult=null; downloadBtn.style.display='none'; printBtn.style.display='none';
   if(!activeSection) return;
-  const input = byId(activeSection+'Files'); const files = Array.from(input.files || []);
+  const input = byId(activeSection+'Files');
+  const files = Array.from(input.files || []);
   overlayCount.textContent = `${files.length} file(s)`;
-  if(!files.length){ overlayPreview.innerHTML = `<div class="muted" style="margin-top:12px">No files. Drop files or use Choose.</div>`; return; }
-
-  const LARGE_THRESHOLD = 500; const THUMB_LIMIT = 120;
-  if(activeSection !== 'imgmerge'){
-    // keep existing behaviour for non-image sections
+  if(!files.length){
+    overlayPreview.innerHTML = `<div class="muted" style="margin-top:12px">No files. Drop files or use Choose.</div>`;
+    return;
   }
 
+  const LARGE_THRESHOLD = 500; // switch to lightweight list beyond this count
+  const THUMB_LIMIT = 120; // how many thumbnails to attempt (saves memory)
+
   if(files.length > LARGE_THRESHOLD){
+    // Build compact textual list for very large sets
     const container = document.createElement('div'); container.className='light-list';
     files.forEach((f,i)=>{
       const row = document.createElement('div'); row.className='list-row'; row.draggable = true; row.dataset.index = i;
@@ -397,6 +568,7 @@ async function renderOverlayPreviewFromInput(){
       right.appendChild(openBtn); right.appendChild(delBtn);
       row.appendChild(left); row.appendChild(right);
       container.appendChild(row);
+      // drag-drop reordering handlers within overlay list
       row.addEventListener('dragstart', ev=>{ ev.dataTransfer.setData('text/plain', i); row.classList.add('dragging'); });
       row.addEventListener('dragend', ()=> row.classList.remove('dragging'));
       row.addEventListener('dragover', ev=> ev.preventDefault());
@@ -406,21 +578,31 @@ async function renderOverlayPreviewFromInput(){
     return;
   }
 
+  // For moderate number of files, create cards with thumbnail/content preview
   for(let i=0;i<files.length;i++){
     const f = files[i];
     const card = document.createElement('div'); card.className='preview-card'; card.draggable = true; card.dataset.index = i; card.style.color='#111';
+    // Drag-reorder support for preview cards
     card.addEventListener('dragstart', ev=>{ ev.dataTransfer.setData('text/plain', i); card.classList.add('dragging'); });
     card.addEventListener('dragend', ()=> card.classList.remove('dragging'));
     card.addEventListener('dragover', ev=> ev.preventDefault());
     card.addEventListener('drop', ev=>{ ev.preventDefault(); const from = Number(ev.dataTransfer.getData('text/plain')); const to = Number(card.dataset.index); reorderFiles(byId(activeSection+'Files'), from, to); renderOverlayPreviewFromInput(); });
 
-    const previewEl = document.createElement('div'); previewEl.style.minHeight='90px'; previewEl.style.display='flex'; previewEl.style.alignItems='center'; previewEl.style.justifyContent='center'; previewEl.style.position='relative';
+    const previewEl = document.createElement('div');
+    previewEl.style.minHeight='90px';
+    previewEl.style.display='flex';
+    previewEl.style.alignItems='center';
+    previewEl.style.justifyContent='center';
+    previewEl.style.position='relative';
+
     const name = f.name.toLowerCase();
 
+    // show image thumbnail for common image types
     if(i < THUMB_LIMIT && (name.match(/\.(jpe?g|png|gif|bmp|webp)$/) || (f.type && f.type.startsWith('image/')))){
       const img = document.createElement('img'); img.src = URL.createObjectURL(f); img.onload = ()=> URL.revokeObjectURL(img.src);
       previewEl.appendChild(img);
     } else if(i < THUMB_LIMIT && name.endsWith('.pdf')){
+      // For PDFs, render first page thumbnail using pdf.js
       const canvas = document.createElement('canvas'); canvas.style.maxWidth='100%'; canvas.style.maxHeight='90px'; previewEl.appendChild(canvas);
       (async ()=>{
         try{
@@ -436,6 +618,7 @@ async function renderOverlayPreviewFromInput(){
         }catch(e){ previewEl.innerHTML = '<div class="muted">Preview error</div>'; }
       })();
     } else {
+      // Fallback: display file extension as a badge
       const ext = (f.name.split('.').pop() || '').toUpperCase();
       const icon = document.createElement('div'); icon.innerHTML = `<div style="font-weight:700;font-size:18px">${escapeHtml(ext)}</div>`; previewEl.appendChild(icon);
     }
@@ -452,23 +635,59 @@ async function renderOverlayPreviewFromInput(){
   }
 }
 
+/* reorderFiles: reorders files inside an <input type=file> by index
+   - We must rebuild a DataTransfer because input.files is read-only
+   - After reordering we call setListFromInput to update UI display */
 function reorderFiles(inputEl, fromIndex, toIndex){
   const files = Array.from(inputEl.files || []);
   if(fromIndex < 0 || toIndex < 0 || fromIndex >= files.length || toIndex > files.length) return;
   const file = files.splice(fromIndex,1)[0];
   files.splice(toIndex,0,file);
-  const dt = new DataTransfer(); files.forEach(f=> dt.items.add(f)); inputEl.files = dt.files; setListFromInput(activeSection);
+  const dt = new DataTransfer();
+  files.forEach(f=> dt.items.add(f));
+  inputEl.files = dt.files;
+  setListFromInput(activeSection);
 }
 
-function overlayRemove(index){ if(!activeSection) return; const input = byId(activeSection+'Files'); const dt = new DataTransfer(); Array.from(input.files || []).forEach((f,i)=> { if(i!==index) dt.items.add(f); }); input.files = dt.files; setListFromInput(activeSection); renderOverlayPreviewFromInput(); overlayCount.textContent = (input.files.length || 0) + ' files'; }
-function openFileInNewTab(file){ const url = URL.createObjectURL(file); window.open(url,'_blank'); setTimeout(()=> URL.revokeObjectURL(url), 30000); }
+/* Remove (delete) a single file from the active section input */
+function overlayRemove(index){
+  if(!activeSection) return;
+  const input = byId(activeSection+'Files');
+  const dt = new DataTransfer();
+  Array.from(input.files || []).forEach((f,i)=> { if(i!==index) dt.items.add(f); });
+  input.files = dt.files;
+  setListFromInput(activeSection);
+  renderOverlayPreviewFromInput();
+  overlayCount.textContent = (input.files.length || 0) + ' files';
+}
 
-/* ---------- conversion helpers (real) ---------- */
+/* Open a file in a new tab using an object URL */
+function openFileInNewTab(file){
+  const url = URL.createObjectURL(file);
+  window.open(url,'_blank');
+  // revoke later to release memory (timeout keeps it open briefly)
+  setTimeout(()=> URL.revokeObjectURL(url), 30000);
+}
+
+/* ---------- conversion helpers (utilities) ---------- */
+/* Utility: read a File as ArrayBuffer (promisified FileReader) */
 const readAsArrayBuffer = (file) => new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsArrayBuffer(file); });
 
-/* MERGE PDFs */
+/* ---------- conversion implementations ---------- */
+/*
+  Each converter function returns an object:
+    { blob: Blob, filename: string, mime: string }
+  The Submit handler (below) calls the function and manages download/print UI.
+*/
+
+/* MERGE PDFs (client-side using pdf-lib)
+   - Loads each selected PDF
+   - Copies pages into a new PDF document
+   - Returns resulting PDF blob
+*/
 async function doMergePDFs(){
-  const input = byId('mergeFiles'); if(!input.files.length) throw new Error('No PDF files selected');
+  const input = byId('mergeFiles');
+  if(!input.files.length) throw new Error('No PDF files selected');
   const outPdf = await PDFLib.PDFDocument.create();
   for(const f of Array.from(input.files)){
     const bytes = await f.arrayBuffer();
@@ -480,120 +699,249 @@ async function doMergePDFs(){
   return { blob: new Blob([merged],{type:'application/pdf'}), filename: 'merged.pdf', mime: 'application/pdf' };
 }
 
-/* PDF -> DOCX */
-async function doPdfToDocx(){
-  const inEl = byId('pdf2docxFiles'); if(!inEl || !inEl.files[0]) throw new Error('Pick a PDF file');
-  const fbytes = await readAsArrayBuffer(inEl.files[0]);
-  const pdf = await pdfjsLib.getDocument({data: fbytes}).promise;
-  const paragraphs=[];
-  for(let p=1;p<=pdf.numPages;p++){ const page = await pdf.getPage(p); const content = await page.getTextContent(); const text = content.items.map(i=>i.str||'').join(' '); paragraphs.push(`— Page ${p} —`); paragraphs.push(text.trim()); }
-  const { Document, Paragraph, Packer } = docx;
-  const doc = new Document({ sections:[{ children: paragraphs.map(t=> new Paragraph(t)) }]});
+/* PDF -> DOCX
+  /* ===============================================
+   📝 PDF → DOCX Converter (Auto-loads docx library)
+   -----------------------------------------------
+   Converts a selected PDF file into a DOCX Word file.
+   If the DOCX library isn't loaded, it downloads it automatically.
+   =============================================== */
+async function doPdfToDocx() {
+
+  // 🔹 STEP 1 — Get the input element and check for a selected PDF
+  const inEl = document.getElementById('pdf2docxFiles'); // <input type="file" id="pdf2docxFiles">
+  if (!inEl || !inEl.files[0]) 
+    throw new Error('Please select a PDF file first.'); // Stop if no file is chosen
+
+  // 🔹 STEP 2 — Check that PDF.js is available (needed to read PDF text)
+  if (!window.pdfjsLib) {
+    throw new Error('The PDF.js library failed to load.');
+  }
+
+  // 🔹 STEP 3 — Check if DOCX library is loaded, if not, load it dynamically
+  if (!window.docx) {
+    // Creates a <script> tag to load the library from CDN
+    await new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = "https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js";
+      script.onload = () => {
+        // When loaded, confirm it actually defined window.docx
+        if (window.docx) resolve();
+        else reject(new Error("DOCX script loaded but window.docx is still undefined."));
+      };
+      script.onerror = () => reject(new Error("Failed to load DOCX library from CDN."));
+      document.head.appendChild(script); // Add <script> into <head>
+    });
+  }
+
+  // 🔹 STEP 4 — Extract tools (classes) from the DOCX library
+  // These are used to build a Word document
+  const { Document, Paragraph, Packer } = window.docx;
+
+  // 🔹 STEP 5 — Read the uploaded PDF file as raw bytes
+  const file = inEl.files[0];
+  const fbytes = await file.arrayBuffer();
+
+  // 🔹 STEP 6 — Use PDF.js to open and read all PDF pages
+  const pdf = await pdfjsLib.getDocument({ data: fbytes }).promise;
+
+  // We'll store text paragraphs from each page here
+  const paragraphs = [];
+
+  // 🔹 STEP 7 — Loop through every page of the PDF
+  for (let p = 1; p <= pdf.numPages; p++) {
+    const page = await pdf.getPage(p);                // Get one page
+    const content = await page.getTextContent();      // Get the text content
+    const text = content.items.map(i => i.str || '').join(' '); // Combine all text strings
+
+    // Add the text to our paragraphs array
+    paragraphs.push(`— Page ${p} —`); // Page separator
+    paragraphs.push(text.trim());      // Actual text
+  }
+
+  // 🔹 STEP 8 — Create a new DOCX document
+  const doc = new Document({
+    sections: [
+      {
+        // Convert each paragraph string into a Word Paragraph object
+        children: paragraphs.map(t => new Paragraph(t)),
+      },
+    ],
+  });
+
+  // 🔹 STEP 9 — Generate the DOCX file as a Blob (file-like object)
   const blob = await Packer.toBlob(doc);
-  return { blob, filename: (inEl.files[0].name.replace(/\.pdf$/i,'')||'document') + '.docx', mime:'application/vnd.openxmlformats-officedocument.wordprocessingml.document' };
+
+  // 🔹 STEP 10 — Create a nice filename for the output
+  const filename = (file.name.replace(/\.pdf$/i, '') || 'document') + '.docx';
+
+  // MIME type for Word documents
+  const mime = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+
+  // 🔹 STEP 11 — Return the result (your main system will handle saving/downloading)
+  return { blob, filename, mime };
 }
 
-/* DOCX -> PDF */
+
+/* DOCX -> PDF (client-side approximation)
+   - Uses mammoth to convert docx -> HTML/text.
+   - Uses pdfmake to render the extracted blocks into a PDF.
+   - Note: this preserves textual content and headings roughly, but not full Word layout.
+*/
 async function doDocxToPdf(){
-  const inEl = byId('docx2pdfFiles'); if(!inEl || !inEl.files[0]) throw new Error('Pick a .docx file');
+  const inEl = byId('docx2pdfFiles');
+  if(!inEl || !inEl.files[0]) throw new Error('Pick a .docx file');
   const ab = await readAsArrayBuffer(inEl.files[0]);
   const result = await mammoth.convertToHtml({ arrayBuffer: ab });
   const tmp = document.createElement('div'); tmp.innerHTML = result.value;
+
+  // Build a simple array of text blocks from headings and paragraphs
   const textBlocks = Array.from(tmp.querySelectorAll('p, h1, h2, h3, h4, h5, h6')).map(el=> ({ text: el.textContent, margin:[0,4,0,4] }));
   const docDef = { content: textBlocks, defaultStyle:{ fontSize:11 } };
+
+  // pdfMake API: create PDF and return blob via callback
   return new Promise((res,rej)=> pdfMake.createPdf(docDef).getBlob(blob => res({ blob, filename: (inEl.files[0].name.replace(/\.docx$/i,'')||'document') + '.pdf', mime:'application/pdf' })));
 }
 
-/* XLSX -> PDF */
+/* XLSX -> PDF (client-side)
+   - Read the first worksheet and build a basic table using pdfmake
+   - This is intended for simple spreadsheets; very complex sheets may need server processing.
+*/
 async function doXlsxToPdf(){
   const inEl = byId('xls2pdfFiles'); if(!inEl || !inEl.files[0]) throw new Error('Pick an .xlsx file');
-  const ab = await readAsArrayBuffer(inEl.files[0]); const wb = XLSX.read(ab, { type:'array' });
-  const wsName = wb.SheetNames[0]; const ws = wb.Sheets[wsName];
+  const ab = await readAsArrayBuffer(inEl.files[0]);
+  const wb = XLSX.read(ab, { type:'array' });
+  const wsName = wb.SheetNames[0];
+  const ws = wb.Sheets[wsName];
   const data = XLSX.utils.sheet_to_json(ws, { header:1, blankrows:false });
+
+  // Convert rows to pdfmake table body
   const tableBody = data.map(r=> r.map(cell => ({ text: (cell==null?'':String(cell)), margin:[2,2,2,2] })));
   const docDef = { content:[{ text: wsName, style:'header', margin:[0,0,0,8] }, { table:{ body: tableBody, headerRows:1 } }], styles:{ header:{ fontSize:14, bold:true } } };
+
   return new Promise((res,rej)=> pdfMake.createPdf(docDef).getBlob(blob => res({ blob, filename: (inEl.files[0].name.replace(/\.xlsx$/i,'')||'sheet') + '.pdf', mime:'application/pdf' })));
 }
 
-/* PDF -> XLSX */
+/* PDF -> XLSX (text extraction)
+   - Extracts page text and puts each page in a row. Good for structured text PDFs but not tables.
+*/
 async function doPdfToXlsx(){
   const inEl = byId('pdf2xlsFiles'); if(!inEl || !inEl.files[0]) throw new Error('Pick a PDF file');
-  const ab = await readAsArrayBuffer(inEl.files[0]); const pdf = await pdfjsLib.getDocument({data:ab}).promise;
-  const rows=[]; for(let p=1;p<=pdf.numPages;p++){ const page = await pdf.getPage(p); const content = await page.getTextContent(); const line = content.items.map(i=>i.str).join(' '); rows.push([`Page ${p}`, line]); }
-  const wb = XLSX.utils.book_new(); const ws = XLSX.utils.aoa_to_sheet([['Page','Content'], ...rows]); XLSX.utils.book_append_sheet(wb, ws, 'Extracted');
+  const ab = await readAsArrayBuffer(inEl.files[0]);
+  const pdf = await pdfjsLib.getDocument({data:ab}).promise;
+  const rows=[];
+  for(let p=1;p<=pdf.numPages;p++){
+    const page = await pdf.getPage(p);
+    const content = await page.getTextContent();
+    const line = content.items.map(i=>i.str).join(' ');
+    rows.push([`Page ${p}`, line]);
+  }
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet([['Page','Content'], ...rows]);
+  XLSX.utils.book_append_sheet(wb, ws, 'Extracted');
   const out = XLSX.write(wb, { type:'array', bookType:'xlsx' });
   return { blob: new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}), filename: (inEl.files[0].name.replace(/\.pdf$/i,'')||'pdf') + '.xlsx', mime:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
 }
 
-/* DOCX -> XLSX */
+/* DOCX -> XLSX (paragraph extraction)
+   - Uses mammoth.extractRawText to get paragraphs, then writes each paragraph into an Excel row.
+*/
 async function doDocxToXlsx(){
   const inEl = byId('docx2xlsFiles'); if(!inEl || !inEl.files[0]) throw new Error('Pick a .docx file');
-  const ab = await readAsArrayBuffer(inEl.files[0]); const result = await mammoth.extractRawText({ arrayBuffer: ab });
+  const ab = await readAsArrayBuffer(inEl.files[0]);
+  const result = await mammoth.extractRawText({ arrayBuffer: ab });
   const lines = result.value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
   const data = [['Paragraph']].concat(lines.map(s=>[s]));
-  const wb = XLSX.utils.book_new(); const ws = XLSX.utils.aoa_to_sheet(data); XLSX.utils.book_append_sheet(wb, ws, 'Paragraphs');
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  XLSX.utils.book_append_sheet(wb, ws, 'Paragraphs');
   const out = XLSX.write(wb, { type:'array', bookType:'xlsx' });
   return { blob: new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}), filename: (inEl.files[0].name.replace(/\.docx$/i,'')||'doc') + '.xlsx', mime:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
 }
 
-/* XLSX -> DOCX */
+/* XLSX -> DOCX
+   - Reads first sheet and builds a simple Word table using the docx library.
+   - Each row in the sheet becomes a table row in the Word doc.
+*/
 async function doXlsxToDocx(){
   const inEl = byId('xls2docxFiles'); if(!inEl || !inEl.files[0]) throw new Error('Pick an .xlsx file');
-  const ab = await readAsArrayBuffer(inEl.files[0]); const wb = XLSX.read(ab, { type:'array' });
-  const wsName = wb.SheetNames[0]; const ws = wb.Sheets[wsName]; const data = XLSX.utils.sheet_to_json(ws, { header:1, blankrows:false });
+  const ab = await readAsArrayBuffer(inEl.files[0]);
+  const wb = XLSX.read(ab, { type:'array' });
+  const wsName = wb.SheetNames[0];
+  const ws = wb.Sheets[wsName];
+  const data = XLSX.utils.sheet_to_json(ws, { header:1, blankrows:false });
+
   const { Document, Packer, Paragraph, Table, TableRow, TableCell, WidthType, AlignmentType } = docx;
-  const rows = (data.length ? data : [['Empty']]).map(r => new TableRow({ children: (r.length ? r : ['']).map(cell => new TableCell({ children:[ new Paragraph(String(cell)) ], width:{ size: 100/(data[0]?.length||1), type: WidthType.PERCENTAGE } })) }));
+  const rows = (data.length ? data : [['Empty']]).map(r => new TableRow({
+    children: (r.length ? r : ['']).map(cell => new TableCell({ children:[ new Paragraph(String(cell)) ], width:{ size: 100/(data[0]?.length||1), type: WidthType.PERCENTAGE } }))
+  }));
   const table = new Table({ rows, width: { size: 100, type: WidthType.PERCENTAGE } });
   const documentObj = new Document({ sections:[{ children:[ new Paragraph({ text: wsName, alignment: AlignmentType.CENTER }), table ] }]});
   const blob = await Packer.toBlob(documentObj);
   return { blob, filename: (inEl.files[0].name.replace(/\.xlsx$/i,'')||'sheet') + '.docx', mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' };
 }
 
-/* ---------- IMAGES -> MERGE (TOGETHER OR INDIVIDUAL) ---------- */
+/* ---------- IMAGES -> MERGE (TOGETHER OR INDIVIDUAL PAGES) ---------- */
+/*
+  doImageMergeToPdf:
+  - Reads image files (with optional per-image edits from imageEdits)
+  - Embeds each image into a PDF page sized by selected paper (A4/A3/Letter/Custom)
+  - If mode === 'individual' then each image on its own page;
+    'together' currently behaves same as 'individual' but kept for future layout options.
+*/
 async function doImageMergeToPdf(){
   const inEl = byId('imgmergeFiles');
   if(!inEl || !inEl.files.length) throw new Error('No images selected');
   const files = Array.from(inEl.files);
-  const mm2pt = mm => mm * 2.8346456693;
+
+  const mm2pt = mm => mm * 2.8346456693; // convert millimeters to PDF points (approx.)
   let wmm,hmm;
   const ps = paperSizeEl.value;
   if(ps === 'A4'){ wmm = 210; hmm = 297; }
   else if(ps === 'A3'){ wmm = 297; hmm = 420; }
   else if(ps === 'Letter'){ wmm = 216; hmm = 279; }
   else { wmm = Number(customW.value) || 210; hmm = Number(customH.value) || 297; }
+
   const orient = document.querySelector('input[name="orient"]:checked').value;
   let pageW = mm2pt(orient === 'portrait' ? wmm : hmm);
   let pageH = mm2pt(orient === 'portrait' ? hmm : wmm);
+
   const mode = document.querySelector('input[name="imgMode"]:checked').value; // individual or together
   const globalBrightness = Number(brightnessEl.value)/100;
   const globalContrast = Number(contrastEl.value)/100;
 
   const pdfDoc = await PDFLib.PDFDocument.create();
 
-  // helper: draw image to canvas and apply filters, crop and resize if user edited
+  // processImageToArrayBuffer: draws image to a canvas, applies crop/resize/filters, returns PNG bytes
   async function processImageToArrayBuffer(file){
     const key = file.name + '__' + file.lastModified;
     const edit = imageEdits.get(key);
     const imgBitmap = await createImageBitmap(file);
-    // determine source crop
+
+    // crop coordinates and sizes are in natural image pixel units (not canvas)
     let sx = 0, sy = 0, sw = imgBitmap.width, sh = imgBitmap.height;
     if(edit && edit.crop){ sx = Math.max(0, Math.floor(edit.crop.x)); sy = Math.max(0, Math.floor(edit.crop.y)); sw = Math.max(1, Math.floor(edit.crop.w)); sh = Math.max(1, Math.floor(edit.crop.h)); }
-    // determine dest size from resize or from crop
+
+    // destination width/height: either edited size or actual crop size
     let dw = sw, dh = sh;
     if(edit && edit.resize && edit.resize.w && edit.resize.h){ dw = Math.max(1, Math.floor(edit.resize.w)); dh = Math.max(1, Math.floor(edit.resize.h)); }
-    // if no explicit resize and user set global page size, keep original pixels but may scale later when drawing on PDF page
+
     const canvas = document.createElement('canvas'); canvas.width = dw; canvas.height = dh;
     const ctx = canvas.getContext('2d');
-    // apply filters: use percent form for broader compatibility
+
+    // choose filter settings either from per-image edit or global sliders
     const b = (edit && edit.brightness!=null) ? edit.brightness : globalBrightness;
     const c = (edit && edit.contrast!=null) ? edit.contrast : globalContrast;
     ctx.filter = `brightness(${b*100}%) contrast(${c*100}%)`;
-    // draw cropped region to canvas scaled to desired size
+
+    // draw the (cropped) source to canvas with scaling if needed
     ctx.drawImage(imgBitmap, sx, sy, sw, sh, 0, 0, dw, dh);
+
     const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
     return await blob.arrayBuffer();
   }
 
+  // embed images into PDF pages
   if(mode === 'individual'){
     for(const f of files){
       try{
@@ -613,6 +961,7 @@ async function doImageMergeToPdf(){
       } catch(e){ console.error('img error', e); }
     }
   } else {
+    // 'together' currently same as individual — placeholder for future layout combining
     for(const f of files){
       try{
         const arr = await processImageToArrayBuffer(f);
@@ -636,7 +985,11 @@ async function doImageMergeToPdf(){
   return { blob: new Blob([out], { type:'application/pdf' }), filename: 'images-merged.pdf', mime: 'application/pdf' };
 }
 
-/* ---------- mapping of sections to actions ---------- */
+/* ---------- mapping: section id -> function ---------- */
+/*
+  This mapping allows the common Submit handler to call the right converter function
+  based on which overlay (section) the user opened.
+*/
 const sectionToAction = {
   merge: doMergePDFs,
   pdf2docx: doPdfToDocx,
@@ -648,10 +1001,21 @@ const sectionToAction = {
   imgmerge: doImageMergeToPdf
 };
 
-/* ---------- Submit (perform conversion, show Download/Print) ---------- */
+/* ---------- Submit handler: call conversion and surface result ---------- */
+/*
+  Behavior:
+  - Disables Submit button while working
+  - Calls the mapped conversion function
+  - Shows a success message and enables Download / Print buttons
+  - Print is enabled only for PDFs (browser print)
+*/
 submitBtn.addEventListener('click', async ()=>{
   if(!activeSection) return alert('No active converter.');
-  submitBtn.disabled=true; submitBtn.textContent='Working...'; postMsg.innerHTML=''; downloadBtn.style.display='none'; printBtn.style.display='none';
+  submitBtn.disabled=true;
+  submitBtn.textContent='Working...';
+  postMsg.innerHTML='';
+  downloadBtn.style.display='none';
+  printBtn.style.display='none';
   try{
     const func = sectionToAction[activeSection];
     if(!func) throw new Error('No action found.');
@@ -659,88 +1023,144 @@ submitBtn.addEventListener('click', async ()=>{
     lastResult = result;
     postMsg.innerHTML = `<div style="margin-top:8px;color:green">Done: ${escapeHtml(result.filename)}</div>`;
     downloadBtn.style.display=''; downloadBtn.onclick = ()=> saveBlob(result.blob, result.filename);
-    if(result.mime === 'application/pdf'){ printBtn.style.display=''; printBtn.onclick = ()=> { const url = URL.createObjectURL(result.blob); const w = window.open(url,'_blank'); setTimeout(()=> w.print(),700); setTimeout(()=> URL.revokeObjectURL(url),30000); }; } else { printBtn.style.display='none'; printBtn.onclick = null; }
-  }catch(err){ console.error(err); postMsg.innerHTML = `<div style="margin-top:8px;color:red">Error: ${escapeHtml(err.message || String(err))}</div>`; }
-  finally{ submitBtn.disabled=false; submitBtn.textContent='Submit'; }
+    if(result.mime === 'application/pdf'){
+      printBtn.style.display='';
+      printBtn.onclick = ()=> {
+        const url = URL.createObjectURL(result.blob);
+        const w = window.open(url,'_blank');
+        // small delay to allow new tab to load the PDF then call print
+        setTimeout(()=> w.print(),700);
+        setTimeout(()=> URL.revokeObjectURL(url),30000);
+      };
+    } else {
+      printBtn.style.display='none';
+      printBtn.onclick = null;
+    }
+  }catch(err){
+    console.error(err);
+    postMsg.innerHTML = `<div style="margin-top:8px;color:red">Error: ${escapeHtml(err.message || String(err))}</div>`;
+  } finally{
+    submitBtn.disabled=false;
+    submitBtn.textContent='Submit';
+  }
 });
 
-/* Hide show button */
- // Get the button and the body element
-  const toggleBtn = document.getElementById('toggleBgBtn');
-  const body = document.body;
+/* ---------- UI: background toggle button ---------- */
+/*
+  Allows user to toggle between gradient and photo background.
+  This is purely cosmetic; no functional behavior depends on it.
+*/
+const toggleBtn = document.getElementById('toggleBgBtn');
+const body = document.body;
+let bgVisible = true; // starts with image shown
 
-  // Track state
-  let bgVisible = true; // starts with image shown
-
-  toggleBtn.addEventListener('click', () => {
-    if (bgVisible) {
-      // Remove background image, show gradient
-      body.classList.remove('bg-image');
-      bgVisible = false;
-      toggleBtn.textContent = "🌅 Show Background";
-    } else {
-      // Add background image
-      body.classList.add('bg-image');
-      bgVisible = true;
-      toggleBtn.textContent = "🌅 Hide Background";
-    }
-  });
-
+toggleBtn.addEventListener('click', () => {
+  if (bgVisible) {
+    // switch to gradient (remove image)
+    body.classList.remove('bg-image');
+    bgVisible = false;
+    toggleBtn.textContent = "🌅 Show Background";
+  } else {
+    // set image background class
+    body.classList.add('bg-image');
+    bgVisible = true;
+    toggleBtn.textContent = "🌅 Hide Background";
+  }
+});
 
 /* ---------- image editor implementation (live crop + resize + filters) ---------- */
+/*
+  Image editor is a lightweight in-browser editor:
+  - openImageEditor(index): loads file at index from imgmergeFiles into an <canvas>
+  - drawEditorCanvas(): shows preview scaled to canvas and draws crop rectangle overlay
+  - mouse events allow user to drag to select crop area
+  - applyCrop: saves edit settings into imageEdits map for later PDF merging
+*/
+
+/* editor DOM refs */
 const imgEditor = byId('imgEditor');
 const editCanvas = byId('editCanvas'); const editCtx = editCanvas.getContext('2d');
 const cropRectEl = byId('cropRect');
 const resizeW = byId('resizeW'), resizeH = byId('resizeH'), keepAspect = byId('keepAspect');
 const editBrightness = byId('editBrightness'), editContrast = byId('editContrast');
 const closeEditor = byId('closeEditor'), applyCrop = byId('applyCrop'), resetCrop = byId('resetCrop');
-let currentEditIndex = null; let currentImageBitmap = null; let dragStart = null; let currentCrop = null; let naturalAspect = 1;
 
+let currentEditIndex = null;        // which image index is being edited
+let currentImageBitmap = null;      // ImageBitmap used to draw and read pixels
+let dragStart = null;               // pointer start for crop selection
+let currentCrop = null;             // {x,y,w,h} in natural image pixels
+let naturalAspect = 1;              // width/height ratio of original image
+
+/* Open image editor for a given image index (from imgmergeFiles) */
 function openImageEditor(index){
-  const input = byId('imgmergeFiles'); const file = (input.files || [])[index]; if(!file) return alert('File not found');
-  currentEditIndex = index; const key = file.name + '__' + file.lastModified; const edit = imageEdits.get(key) || {};
+  const input = byId('imgmergeFiles');
+  const file = (input.files || [])[index];
+  if(!file) return alert('File not found');
+  currentEditIndex = index;
+  const key = file.name + '__' + file.lastModified;
+  const edit = imageEdits.get(key) || {};
+
+  // createImageBitmap is efficient and avoids decoding to canvas directly
   createImageBitmap(file).then(bitmap => {
-    currentImageBitmap = bitmap; naturalAspect = bitmap.width/bitmap.height;
-    // set canvas to a reasonable display size while preserving aspect
-    const maxW = Math.min(800, window.innerWidth - 420); const maxH = Math.min(600, window.innerHeight - 200);
+    currentImageBitmap = bitmap;
+    naturalAspect = bitmap.width / bitmap.height;
+
+    // compute a reasonable display size for the canvas while preserving aspect ratio
+    const maxW = Math.min(800, window.innerWidth - 420);
+    const maxH = Math.min(600, window.innerHeight - 200);
     let scale = Math.min(maxW/bitmap.width, maxH/bitmap.height, 1);
     editCanvas.width = Math.floor(bitmap.width * scale);
     editCanvas.height = Math.floor(bitmap.height * scale);
-    // restore crop if any
+
+    // restore crop & resize values if previously edited
     if(edit.crop){ currentCrop = Object.assign({}, edit.crop); }
     else { currentCrop = { x:0, y:0, w:bitmap.width, h:bitmap.height }; }
-    // restore resize
-    if(edit.resize){ resizeW.value = edit.resize.w; resizeH.value = edit.resize.h; } else { resizeW.value = bitmap.width; resizeH.value = bitmap.height; }
+
+    if(edit.resize){ resizeW.value = edit.resize.w; resizeH.value = edit.resize.h; }
+    else { resizeW.value = bitmap.width; resizeH.value = bitmap.height; }
+
     editBrightness.value = Math.round(((edit.brightness!=null?edit.brightness:1)*100));
     editContrast.value = Math.round(((edit.contrast!=null?edit.contrast:1)*100));
+
     drawEditorCanvas();
     imgEditor.style.display='block';
   });
 }
 
+/* drawEditorCanvas: render preview and overlay of crop box */
 function drawEditorCanvas(){
   if(!currentImageBitmap) return;
-  // because canvas size may be scaled down for display, compute display scale
+  // compute display scale to convert between natural image coords and canvas coords
   const dispScaleX = editCanvas.width / currentImageBitmap.width;
   const dispScaleY = editCanvas.height / currentImageBitmap.height;
+
   editCtx.clearRect(0,0,editCanvas.width,editCanvas.height);
-  // apply preview filters
-  const b = Number(editBrightness.value)/100; const c = Number(editContrast.value)/100;
+  // apply preview filters locally via canvas context filter (not persisted to file until apply)
+  const b = Number(editBrightness.value)/100;
+  const c = Number(editContrast.value)/100;
   editCtx.filter = `brightness(${b*100}%) contrast(${c*100}%)`;
-  // draw full image scaled to canvas
+
+  // draw the full image scaled to canvas
   editCtx.drawImage(currentImageBitmap, 0, 0, currentImageBitmap.width, currentImageBitmap.height, 0, 0, editCanvas.width, editCanvas.height);
-  // draw crop overlay
+
+  // if there is a crop region, draw a translucent overlay and a clearer crop area above it
   if(currentCrop){
     const x = Math.max(0, Math.floor(currentCrop.x * dispScaleX));
     const y = Math.max(0, Math.floor(currentCrop.y * dispScaleY));
     const w = Math.max(1, Math.floor(currentCrop.w * dispScaleX));
     const h = Math.max(1, Math.floor(currentCrop.h * dispScaleY));
-    cropRectEl.style.display='block'; cropRectEl.style.left = (editCanvas.getBoundingClientRect().left + x) + 'px';
+
+    // position the absolute cropRect element to visually show the selected area on the page
+    cropRectEl.style.display='block';
+    cropRectEl.style.left = (editCanvas.getBoundingClientRect().left + x) + 'px';
     cropRectEl.style.top = (editCanvas.getBoundingClientRect().top + y) + 'px';
-    cropRectEl.style.width = w + 'px'; cropRectEl.style.height = h + 'px';
-    // also draw a translucent dimming overlay on canvas for clarity
+    cropRectEl.style.width = w + 'px';
+    cropRectEl.style.height = h + 'px';
+
+    // dim entire canvas to show the crop area more clearly
     editCtx.save(); editCtx.fillStyle = 'rgba(0,0,0,0.35)'; editCtx.fillRect(0,0,editCanvas.width,editCanvas.height); editCtx.restore();
-    // redraw the cropped area on top
+
+    // redraw the cropped area on top without the dimming so it's visible
     editCtx.save();
     editCtx.filter = `brightness(${b*100}%) contrast(${c*100}%)`;
     editCtx.drawImage(currentImageBitmap, currentCrop.x, currentCrop.y, currentCrop.w, currentCrop.h, x, y, w, h);
@@ -750,43 +1170,100 @@ function drawEditorCanvas(){
   }
 }
 
-// mouse interactions for drawing crop rectangle
-let isDragging = false; let start = null;
+/* ---------- interactions for drawing crop rectangle ---------- */
+/*
+  The crop selection uses mouse down/move/up on the canvas.
+  We convert between canvas display coords and natural image pixel coords.
+*/
+let isDragging = false;
+let start = null;
+
 editCanvas.addEventListener('mousedown', (e)=>{
-  const rect = editCanvas.getBoundingClientRect(); const x = e.clientX - rect.left; const y = e.clientY - rect.top; isDragging = true; start = {x,y}; dragStart = start; });
+  const rect = editCanvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  isDragging = true;
+  start = {x,y};
+  dragStart = start;
+});
+
 window.addEventListener('mousemove', (e)=>{
-  if(!isDragging || !start) return; const rect = editCanvas.getBoundingClientRect(); const x = e.clientX - rect.left; const y = e.clientY - rect.top; const sx = Math.max(0, Math.min(start.x, x)); const sy = Math.max(0, Math.min(start.y, y)); const ex = Math.max(start.x, x); const ey = Math.max(start.y, y);
-  // convert display coords back to image natural coords
-  const dispScaleX = editCanvas.width / currentImageBitmap.width; const dispScaleY = editCanvas.height / currentImageBitmap.height;
-  currentCrop = { x: Math.floor(sx/dispScaleX), y: Math.floor(sy/dispScaleY), w: Math.max(1, Math.floor((ex-sx)/dispScaleX)), h: Math.max(1, Math.floor((ey-sy)/dispScaleY)) };
+  if(!isDragging || !start) return;
+  const rect = editCanvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  const sx = Math.max(0, Math.min(start.x, x));
+  const sy = Math.max(0, Math.min(start.y, y));
+  const ex = Math.max(start.x, x);
+  const ey = Math.max(start.y, y);
+
+  // convert display coords back to natural image coordinates
+  const dispScaleX = editCanvas.width / currentImageBitmap.width;
+  const dispScaleY = editCanvas.height / currentImageBitmap.height;
+  currentCrop = {
+    x: Math.floor(sx / dispScaleX),
+    y: Math.floor(sy / dispScaleY),
+    w: Math.max(1, Math.floor((ex - sx) / dispScaleX)),
+    h: Math.max(1, Math.floor((ey - sy) / dispScaleY))
+  };
   drawEditorCanvas();
 });
+
 window.addEventListener('mouseup', ()=>{ if(isDragging) { isDragging=false; start=null; } });
 
-// keepAspect handling for resize inputs
+/* Keep aspect ratio logic: if user toggles keepAspect, changes to one size field update the other */
 resizeW.addEventListener('input', ()=>{ if(keepAspect.checked && currentImageBitmap){ resizeH.value = Math.round(Number(resizeW.value) / naturalAspect); } });
 resizeH.addEventListener('input', ()=>{ if(keepAspect.checked && currentImageBitmap){ resizeW.value = Math.round(Number(resizeH.value) * naturalAspect); } });
 
-editBrightness.addEventListener('input', drawEditorCanvas); editContrast.addEventListener('input', drawEditorCanvas);
+/* Dynamic preview filter changes */
+editBrightness.addEventListener('input', drawEditorCanvas);
+editContrast.addEventListener('input', drawEditorCanvas);
 
+/* Close editor (does not save edits) */
 closeEditor.addEventListener('click', ()=>{ imgEditor.style.display='none'; cropRectEl.style.display='none'; });
 
+/* Reset crop to full image and reset resize box to image natural size */
 resetCrop.addEventListener('click', ()=>{ if(!currentImageBitmap) return; currentCrop = { x:0, y:0, w:currentImageBitmap.width, h:currentImageBitmap.height }; resizeW.value = currentImageBitmap.width; resizeH.value = currentImageBitmap.height; drawEditorCanvas(); });
 
+/* Apply crop & edits:
+   - Read currentCrop, resize fields, brightness/contrast and store in imageEdits map
+   - Later when merging images to PDF we read imageEdits to process each image accordingly
+*/
 applyCrop.addEventListener('click', ()=>{
-  const input = byId('imgmergeFiles'); const file = (input.files || [])[currentEditIndex]; if(!file) return;
+  const input = byId('imgmergeFiles');
+  const file = (input.files || [])[currentEditIndex];
+  if(!file) return;
   const key = file.name + '__' + file.lastModified;
-  const edit = { crop: Object.assign({}, currentCrop), resize: { w: Number(resizeW.value), h: Number(resizeH.value) }, brightness: Number(editBrightness.value)/100, contrast: Number(editContrast.value)/100 };
+  const edit = {
+    crop: Object.assign({}, currentCrop),
+    resize: { w: Number(resizeW.value), h: Number(resizeH.value) },
+    brightness: Number(editBrightness.value)/100,
+    contrast: Number(editContrast.value)/100
+  };
   imageEdits.set(key, edit);
-  imgEditor.style.display='none'; cropRectEl.style.display='none'; renderOverlayPreviewFromInput();
+  imgEditor.style.display='none';
+  cropRectEl.style.display='none';
+  renderOverlayPreviewFromInput(); // refresh preview for edited image
 });
 
 /* ---------- helpers ---------- */
-function saveBlob(blob, filename){ try{ saveAs(blob, filename); }catch(e){ const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; document.body.appendChild(a); a.click(); a.remove(); } }
+/* saveBlob: save a Blob to user's disk using FileSaver (or fallback anchor) */
+function saveBlob(blob, filename){
+  try{
+    saveAs(blob, filename); // FileSaver library
+  }catch(e){
+    // fallback: create anchor element and trigger download
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+}
 
+/* initialize file-list UI for each converter at page load */
 converters.forEach(c=> setListFromInput(c.id));
 </script>
 </body>
 </html>
-
-
