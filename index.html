@@ -5,13 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>All-in-One-Converter </title>
 
-  <!--
-    Styling (CSS)
-    - This block contains the complete styling for the page.
-    - I left your visual design intact (colors, spacing, layout).
-    - Comments explain what each major block does and why.
-    - Note (advanced): we keep some CSS shorthand for brevity but explain intent.
-  -->
   <style>
     /* Root color variables. These let you change theme easily. */
     :root{
@@ -19,6 +12,15 @@
       --bg2:#ff4b2b;   /* orange gradient end */
       --accent:#5eead4;/* mint accent color used for buttons */
       --text:#f8f5f6;  /* default text color */
+      
+      /* Base color for the cards (e.g., 'black') */
+      --card-color-name: black; 
+      
+      /* 🔑 CONTROLS CARD TRANSPARENCY: 70% transparency (30% opaque) 🔑 */
+      --card-opacity-pct: 70%; 
+      
+      /* 🔑 CONTROLS INNER FILE LIST TRANSPARENCY: 10% transparency (90% opaque) 🔑 */
+      --list-opacity-pct: 80%;
     }
 
     /* Box sizing: makes width/height easier to reason about */
@@ -53,10 +55,18 @@
 
     /* Card style: semi-transparent dark card with rounded corners and shadow */
     .card{
-      background: rgba(0,0,0,.3);
+      /* Use color-mix with transparency variable */
+      background: color-mix(in srgb, var(--card-color-name), transparent var(--card-opacity-pct));
       border-radius: 14px;
       padding: 14px;
       box-shadow: 0 8px 24px rgba(0,0,0,.3);
+      transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+      transform: translateZ(0); 
+    }
+    .card:hover {
+      /* Subtle 3D tilt and lift when mouse hovers */
+      transform: perspective(1000px) rotateX(1deg) rotateY(1deg) scale(1.02);
+      box-shadow: 0 16px 40px rgba(0,0,0,.5); 
     }
     .card h3{ margin:4px 0 12px 0; }
 
@@ -95,7 +105,8 @@
       font-size:13px;
       max-height:140px;
       overflow:auto;
-      background: rgba(0,0,0,.2);
+      /* Use color-mix with list transparency variable */
+      background: color-mix(in srgb, var(--card-color-name), transparent var(--list-opacity-pct));
       padding:8px;
       border-radius:8px;
     }
@@ -111,9 +122,17 @@
     .overlay.open{ display:flex; }
     .overlay .box{
       background:white; color:black;
-      width:210mm; height:297mm; /* A4 size in CSS; used for a print-like canvas */
-      max-width:95%; max-height:90%; overflow:auto;
-      padding:18px; border-radius:12px; box-shadow:0 0 20px rgba(0,0,0,.4);
+      /* MODIFIED: Use viewport units for near-fullscreen display */
+      width: 95vw; 
+      height: 95vh;
+      max-width: 98vw; /* Allow it to grow close to edges */
+      max-height: 98vh; /* Allow it to grow close to edges */
+      overflow:auto;
+      padding:18px; 
+      border-radius:12px; 
+      box-shadow:0 0 20px rgba(0,0,0,.4);
+      /* REQUESTED: Set base font size to 12px */
+      font-size: 12px; 
     }
     .overlay h2{ margin-top:0; }
 
@@ -134,9 +153,16 @@
     .preview-card img{ max-width:100%; max-height:90px; display:block; margin:0 auto 6px; }
     .preview-card canvas{ max-width:100%; height:auto; display:block; margin:0 auto 6px; }
     .preview-actions{ display:flex; gap:8px; justify-content:center; margin-top:6px; }
-
+    
+    /* New style for clickable cards with edits */
+    .preview-card.individual-edit{
+      border: 2px solid var(--accent);
+      cursor: pointer;
+    }
+    
     /* Minor helper classes */
-    .muted{ color:#666; font-size:13px; }
+    /* MODIFIED: Changed from 13px to 12px for consistency */
+    .muted{ color:#666; font-size:12px; } 
     .light-list{ margin-top:12px; }
     .list-row{
       display:flex; justify-content:space-between; padding:8px;
@@ -153,18 +179,6 @@
     .success{ color:#86efac; }
     .error{ color:#fca5a5; }
 
-    /* Image editor modal styles (inside the overlay box) */
-    #imgEditor{
-      position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
-      z-index:11000; background:white; color:#111; padding:12px; border-radius:8px;
-      box-shadow:0 8px 30px rgba(0,0,0,.6);
-      display:none; width:min(880px,95%); max-height:90%; overflow:auto;
-    }
-    #imgEditor .editor-row{ display:flex; gap:12px; }
-    #imgEditor canvas{ border:1px solid #ddd; background:#fff; max-width:100%; }
-    #imgEditor .controls{ flex-direction:column; min-width:220px; }
-    .crop-rect{ position:absolute; border:2px dashed rgba(0,0,0,.6); pointer-events:none; }
-
     /* Footer layout rules — keep page height and push footer to bottom */
     html, body { height: 100%; margin: 0; }
     .page-wrapper { min-height: 100%; display: flex; flex-direction: column; }
@@ -177,21 +191,37 @@
       font-size:12px;
       border-top: 2px solid darkblue;
     }
+    
+    /* Styles for the Global Editor panel (NEW) */
+    #globalEditorContainer, #individualEditorContainer {
+        margin-bottom: 15px; 
+        background: #fff; 
+        padding: 10px; 
+        border-radius: 8px; 
+        color: #111; 
+        display: none; /* starts hidden */
+        flex-direction: column;
+    }
+    #globalEditorContainer.active {
+        display: flex; /* shows up when active */
+    }
+    #globalEditorControls, #individualEditorControls {
+        display: flex; 
+        gap: 15px; 
+        flex-wrap: wrap;
+    }
+    #globalEditorControls .control-group, #individualEditorControls .control-group {
+        display: flex; 
+        gap: 15px; 
+        flex-wrap: wrap; 
+        background: #f5f5f5; 
+        padding: 8px; 
+        border-radius: 6px; 
+        flex: 1;
+        min-width: 250px;
+    }
   </style>
 
-  <!--
-    JavaScript libraries (CDNs)
-    - FileSaver.js (save files client-side)
-    - pdf-lib (create/manipulate PDF)
-    - pdf.js (read PDFs in browser)
-    - docx (generate Word .docx files)
-    - mammoth (docx -> html/text extraction)
-    - xlsx (read/write Excel)
-    - pdfmake (generate PDF from JS structures)
-    Notes:
-      * pdfjsLib.GlobalWorkerOptions.workerSrc config is required to make pdf.js work.
-      * Using CDNs means browser needs internet to fetch libs the first time.
-  -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
@@ -204,28 +234,86 @@
 </head>
 
 <body class="bg-image">
-  <!-- Toggle background image button -->
   <div class="toggle-bg" id="toggleBgBtn">🌅 Hide / Show Background</div>
 
-  <!-- Header: title and subtitle (kept same) -->
   <header style="color: darkred;">
     <h1 h1 style="color: darkred;">All-in-One Converter</h1>
     <div class="subtitle">Combine PDFs and convert between PDF ↔ Word ↔ Excel (and Images)</div>
   </header>
 
-  <!-- Main wrapper and grid container -->
   <div class="wrap">
     <div class="grid" id="converterGrid"></div>
     <p style="text-align:center;opacity:.9;margin-top:30px">⚡ Fast client-side converter</p>
   </div>
 
-  <!-- Fullscreen overlay (A4-sized dialog) used to preview files and run conversion -->
   <div class="overlay" id="fullscreenOverlay" aria-hidden="true">
     <div class="box" role="dialog" aria-modal="true">
       <h2 id="overlayTitle"></h2>
+      
+      <div id="individualEditorContainer">
+          <h3 id="individualEditorTitle" style="margin-top:0; margin-bottom:10px;">Edit File: <span id="currentFileName" style="font-weight:400;"></span></h3>
+          <div id="individualEditorControls">
+              
+              <div class="control-group">
+                  <h4 style="margin:0; width:100%; margin-bottom:5px;">Color Filters (Images Only)</h4>
+                  <label style="display:block; min-width: 170px;">
+                      Brightness: <span id="indBrightnessValue">0</span>%
+                      <input type="range" min="-100" max="100" value="0" id="indBrightnessSlider" class="slider">
+                  </label>
+                  <label style="display:block; min-width: 170px;">
+                      Contrast: <span id="indContrastValue">0</span>%
+                      <input type="range" min="-100" max="100" value="0" id="indContrastSlider" class="slider">
+                  </label>
+                  <label style="display:block; min-width: 170px;">
+                      Saturation: <span id="indSaturationValue">0</span>%
+                      <input type="range" min="-100" max="100" value="0" id="indSaturationSlider" class="slider">
+                  </label>
+                  <button id="indResetFiltersBtn" class="secondary" style="height:36px; margin-top:5px; margin-left: 17px;">Reset Color</button>
+              </div>
 
-      <!-- Top action row inside overlay: file count + buttons -->
-      <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap">
+              <div class="control-group">
+                  <h4 style="margin:0; width:100%; margin-bottom:5px;">Transform (Images & PDFs)</h4>
+                  <button id="indRotateBtn">Rotate 90° CW</button>
+                  <button id="indFlipXBtn">Flip Horizontal</button>
+                  <button id="indResetTransformBtn" class="secondary">Reset Transform</button>
+              </div>
+          </div>
+          <div style="margin-top:10px; text-align:right;">
+              <button id="indClearBtn" class="secondary">Clear Individual Edits</button>
+              <button id="indDoneBtn">Done Editing</button>
+          </div>
+      </div>
+      <div id="globalEditorContainer">
+          <p style="margin-top:0; margin-bottom:10px; font-weight:700;">Global Edits (Applied to All Supported Files in the list)</p>
+          <div id="globalEditorControls">
+              
+              <div class="control-group">
+                  <h4 style="margin:0; width:100%; margin-bottom:5px;">Color Filters (Images Only)</h4>
+                  <label style="display:block; min-width: 170px;">
+                      Brightness: <span id="brightnessValue">0</span>%
+                      <input type="range" min="-100" max="100" value="0" id="brightnessSlider" class="slider">
+                  </label>
+                  <label style="display:block; min-width: 170px;">
+                      Contrast: <span id="contrastValue">0</span>%
+                      <input type="range" min="-100" max="100" value="0" id="contrastSlider" class="slider">
+                  </label>
+                  <label style="display:block; min-width: 170px;">
+                      Saturation: <span id="saturationValue">0</span>%
+                      <input type="range" min="-100" max="100" value="0" id="saturationSlider" class="slider">
+                  </label>
+                  <button id="resetFiltersBtn" class="secondary" style="height:36px; margin-top:5px; margin-left: 17px;">Reset Color</button>
+              </div>
+
+              <div class="control-group">
+                  <h4 style="margin:0; width:100%; margin-bottom:5px;">Transform (Images & PDFs)</h4>
+                  <button id="rotateBtn">Rotate 90° CW</button>
+                  <button id="flipXBtn">Flip Horizontal</button>
+                  <button id="resetTransformBtn" class="secondary">Reset Transform</button>
+              </div>
+          </div>
+      </div>
+      
+      <div id="overlayControls" style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap">
         <div class="muted" id="overlayCount">0 files</div>
         <div style="display:flex;gap:8px">
           <button id="submitBtn">Submit</button>
@@ -235,99 +323,22 @@
         </div>
       </div>
 
-      <!-- Image-specific controls: only shown for image merging -->
-      <div id="imageControls" style="margin-top:12px;display:none">
-        <div class="controls">
-          <div class="control-group small">
-            Paper:
-            <select id="paperSize">
-              <option value="A4">A4 (210 × 297 mm)</option>
-              <option value="A3">A3 (297 × 420 mm)</option>
-              <option value="Letter">Letter (216 × 279 mm)</option>
-              <option value="Custom">Custom (mm)</option>
-            </select>
-            <input id="customW" type="number" placeholder="W mm" style="width:80px;display:none"/>
-            <input id="customH" type="number" placeholder="H mm" style="width:80px;display:none"/>
-            <label><input type="radio" name="orient" value="portrait" checked/> Portrait</label>
-            <label><input type="radio" name="orient" value="landscape" /> Landscape</label>
-          </div>
-
-          <div class="control-group small">
-            Mode:
-            <label><input type="radio" name="imgMode" value="individual" /> Individual</label>
-            <label><input type="radio" name="imgMode" value="together" checked/> Together</label>
-          </div>
-
-          <div class="control-group small">
-            Brightness: <input id="brightness" class="slider" type="range" min="50" max="150" value="100"/> <span id="bval">100%</span>
-            Contrast: <input id="contrast" class="slider" type="range" min="50" max="150" value="100"/> <span id="cval">100%</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Dropzone and preview area inside overlay -->
       <div id="overlayDrop" class="dropzone" style="margin-top:12px;">Drop files here to add (or click). Paste (Ctrl+V) images to add.</div>
       <div id="overlayPreview" class="preview-row"></div>
       <div id="postMsg" style="margin-top:12px"></div>
     </div>
   </div>
 
-  <!-- Image editor modal (crop/resize/filters) -->
-  <div id="imgEditor" role="dialog" aria-modal="true">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <strong>Image Editor</strong>
-      <div><button id="closeEditor" class="secondary">Close</button></div>
-    </div>
-    <div class="editor-row">
-      <div style="flex:1;position:relative">
-        <canvas id="editCanvas" width="800" height="600"></canvas>
-        <div id="cropRect" class="crop-rect" style="display:none"></div>
-      </div>
-      <div class="controls">
-        <div class="control-group small">
-          Resize (px):<br>
-          W: <input id="resizeW" type="number" style="width:100%" />
-          H: <input id="resizeH" type="number" style="width:100%" />
-          <label><input id="keepAspect" type="checkbox" checked/> Keep aspect</label>
-        </div>
-        <div class="control-group small">
-          Crop: drag on canvas to select area. Use buttons below to reset/apply.
-          <div style="display:flex;gap:6px;margin-top:6px">
-            <button id="resetCrop" class="secondary">Reset</button>
-            <button id="applyCrop">Save</button>
-          </div>
-        </div>
-        <div class="control-group small">
-          Preview Filters:
-          Brightness: <input id="editBrightness" type="range" min="50" max="150" value="100"/><br>
-          Contrast: <input id="editContrast" type="range" min="50" max="150" value="100"/>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Footer: kept same -->
   <footer class="page-footer">
     <div class="footer-content">
       <b><p>© 2025 Your Website Name. All-in-One-Converter. Made with ❤️ for fast client-side conversion.</p></b>
     </div>
   </footer>
 
-  <!--
-    JavaScript logic
-    - Major concerns: file selection UI, overlay preview, conversion functions (pdf->docx, docx->pdf, xlsx->pdf, etc.)
-    - Comments explain the purpose and internals of each function and variable.
-    - I avoided commenting obvious one-line things excessively, but covered every block with advanced-level notes.
-  -->
-<script>
+  <script>
 /* ---------- core setup: prevent default browser drag/drop behavior ---------- */
-/*
-  We block the default behavior for drag events across the window to allow
-  custom handling inside dropzones. This prevents the browser from opening files.
-*/
 ['dragenter','dragover','dragleave','drop'].forEach(ev => {
   window.addEventListener(ev, (e) => {
-    // allow file inputs to receive their native events (don't block clicks inside actual inputs)
     if (e.target && (e.target.tagName === 'INPUT' || (e.target.closest && e.target.closest('input')))) return;
     e.preventDefault();
     e.stopPropagation();
@@ -335,27 +346,24 @@
 });
 
 /* ---------- converter definitions (UI data model) ---------- */
-/*
-  Each converter entry defines:
-  - id: used as element id prefix (e.g., 'mergeFiles', 'mergeList')
-  - label: human label for the card
-  - accept: file input accept attribute
-  The grid UI is generated from this array (single source of truth).
-*/
 const converters = [
-  {id:'merge',label:'Combine / Merge PDFs',accept:'.pdf'},
-  {id:'pdf2docx',label:'PDF → Word (.docx)',accept:'.pdf'},
-  {id:'docx2pdf',label:'Word (.docx) → PDF',accept:'.doc,.docx'},
-  {id:'xls2pdf',label:'Excel (.xlsx) → PDF',accept:'.xls,.xlsx'},
-  {id:'pdf2xls',label:'PDF → Excel (.xlsx)',accept:'.pdf'},
-  {id:'docx2xls',label:'Word (.docx) → Excel (.xlsx)',accept:'.doc,.docx'},
-  {id:'xls2docx',label:'Excel (.xlsx) → Word (.docx)',accept:'.xls,.xlsx'},
-  {id:'imgmerge',label:'Images → Merge (PDF)',accept:'image/*'}
+  // 1. Combine / Merge Files (PDF/Images)
+  {id:'merge', label:'1. Combine / Merge Files (PDF/Images)', accept:'*'},
+  // 2. PDF → Word (.docx)
+  {id:'pdf2docx', label:'2. PDF → Word (.docx)', accept:'.pdf'},
+  // 3. Word (.docx) → PDF
+  {id:'docx2pdf', label:'3. Word (.docx) → PDF', accept:'.doc,.docx'},
+  // 4. Excel (.xlsx) → PDF
+  {id:'xls2pdf', label:'4. Excel (.xlsx) → PDF', accept:'.xls,.xlsx'},
+  // 5. PDF → Excel (.xlsx)
+  {id:'pdf2xls', label:'5. PDF → Excel (.xlsx)', accept:'.pdf'},
+  // 6. Word (.docx) → Excel (.xlsx)
+  {id:'docx2xls', label:'6. Word (.docx) → Excel (.xlsx)', accept:'.doc,.docx'},
+  // 7. Excel (.xlsx) → Word (.docx)
+  {id:'xls2docx', label:'7. Excel (.xlsx) → Word (.docx)', accept:'.xls,.xlsx'}
 ];
 
-/* Insert the converter cards into the grid DOM element.
-   This keeps the HTML source smaller and centralizes card definitions.
-*/
+/* Insert the converter cards into the grid DOM element. */
 const grid = document.getElementById('converterGrid');
 converters.forEach(c=>{
   grid.insertAdjacentHTML('beforeend', `
@@ -382,7 +390,19 @@ function byId(id){ return document.getElementById(id); }
 /* Escape HTML to avoid injection in lists and messages */
 function escapeHtml(s){ return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
 
-/* Update the visible file list for a given card. Shows filename and a remove button. */
+/**
+ * Format file size in bytes into human-readable format (KB, MB, GB).
+ */
+function formatFileSize(bytes){
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+
+/* Update the visible file list for a given card. */
 function setListFromInput(id){
   const input = byId(id+'Files');
   const list = byId(id+'List');
@@ -391,8 +411,7 @@ function setListFromInput(id){
     list.innerHTML='No file selected';
     return;
   }
-  // Map the files to list rows (index used to remove specific one)
-  list.innerHTML = files.map((f,i)=>`<div class="file-item"><div class="meta">${i+1}. ${escapeHtml(f.name)}</div><div><button class="secondary" data-remove="${id}" data-index="${i}">Remove</button></div></div>`).join('');
+  list.innerHTML = files.map((f,i)=>`<div class="file-item"><div class="meta">${i+1}. ${escapeHtml(f.name)} (${formatFileSize(f.size)})</div><div><button class="secondary" data-remove="${id}" data-index="${i}">Remove</button></div></div>`).join('');
 }
 
 /* ---------- wire up dropzone, choose and clear behavior for each converter card ---------- */
@@ -419,12 +438,7 @@ converters.forEach(c=>{
     const dt = new DataTransfer();
     Array.from(input.files || []).forEach(f => dt.items.add(f)); // keep existing files
     Array.from(e.dataTransfer.files || []).forEach(f => {
-      // restrict to images only for imgmerge
-      if(c.id === 'imgmerge'){
-        if(f.type && f.type.startsWith('image/')) dt.items.add(f);
-      } else {
-        dt.items.add(f);
-      }
+      dt.items.add(f);
     });
     input.files = dt.files;
     setListFromInput(c.id);
@@ -451,24 +465,33 @@ document.addEventListener('click', (e)=>{
   setListFromInput(idBase);
 });
 
+
 /* ---------- overlay & preview state and helpers ---------- */
 /* Cached DOM for overlay controls */
 const overlay = byId('fullscreenOverlay'), overlayTitle = byId('overlayTitle'), overlayCount = byId('overlayCount');
 const overlayDrop = byId('overlayDrop'), overlayPreview = byId('overlayPreview');
 const submitBtn = byId('submitBtn'), downloadBtn = byId('downloadBtn'), printBtn = byId('printBtn'), closeBtn = byId('closeBtn'), postMsg = byId('postMsg');
-const imageControls = byId('imageControls');
-const paperSizeEl = byId('paperSize'), customW = byId('customW'), customH = byId('customH');
-const brightnessEl = byId('brightness'), contrastEl = byId('contrast'), bval = byId('bval'), cval = byId('cval');
+const globalEditorContainer = byId('globalEditorContainer');
+const individualEditorContainer = byId('individualEditorContainer'); // NEW
+const overlayBox = document.querySelector('.overlay .box');
 
-/* activeSection holds the id of current converter shown in overlay (e.g., 'merge', 'pdf2docx') */
 let activeSection = null;
 let lastResult = null; // store last conversion result { blob, filename, mime }
 
-/* imageEdits is a map that stores per-image edits (crop/resize/filters).
-   Key format: filename + '__' + lastModified
-   This allows editing multiple images before merging.
-*/
-const imageEdits = new Map();
+/* NEW GLOBAL STATE FOR IMAGE/PDF EDITS */
+let globalMergeSettings = {
+    rotation: 0, // 0, 90, 180, 270...
+    flipX: 1,    // 1 (normal) or -1 (flipped)
+    brightness: 0,
+    contrast: 0,
+    saturation: 0,
+};
+
+// NEW: Per-file settings storage
+let individualFileSettings = {}; // { fileName: { rotation, flipX, brightness, contrast, saturation } }
+let currentEditingFile = null; // Reference to the file currently being edited
+
+let imageCache = {}; // Cache for loaded Image objects to avoid re-loading
 
 /* openFullscreen: show overlay for chosen converter section */
 function openFullscreen(sectionId){
@@ -479,7 +502,23 @@ function openFullscreen(sectionId){
   downloadBtn.style.display='none';
   printBtn.style.display='none';
   postMsg.innerHTML='';
-  imageControls.style.display = (sectionId === 'imgmerge') ? '' : 'none'; // show image controls only for imgmerge
+  closeBtn.textContent = 'Back';
+  closeBtn.onclick = closeFullscreen; // Restore default handler
+  
+  // Show/Hide Global Editor Controls, ensure individual is hidden
+  individualEditorContainer.style.display = 'none'; // Hide individual editor
+  overlayDrop.style.display = 'block'; // Ensure dropzone is visible
+  overlayPreview.style.display = 'flex'; // Ensure preview is visible
+  
+  if (sectionId === 'merge') {
+      globalEditorContainer.classList.add('active');
+      wireGlobalControls(); 
+      resetGlobalControls(false); // Reset settings but don't force a redraw yet
+  } else {
+      globalEditorContainer.classList.remove('active');
+      resetGlobalControls(false); // Reset state when leaving merge section
+  }
+
   renderOverlayPreviewFromInput(); // build preview thumbnails / list
   overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false');
 }
@@ -488,7 +527,16 @@ function openFullscreen(sectionId){
 document.querySelectorAll('[data-full]').forEach(btn=> btn.addEventListener('click', ()=> openFullscreen(btn.getAttribute('data-full')) ));
 
 /* close overlay */
-function closeFullscreen(){ overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); activeSection=null; }
+function closeFullscreen(){ 
+  overlay.classList.remove('open'); 
+  overlay.setAttribute('aria-hidden','true'); 
+  activeSection=null; 
+  globalEditorContainer.classList.remove('active');
+  individualEditorContainer.style.display = 'none'; // Hide individual editor
+  // Clear image cache and reset controls on close
+  imageCache = {}; 
+  resetGlobalControls(false);
+}
 closeBtn.addEventListener('click', closeFullscreen);
 
 /* overlay drop handlers: allow adding files into overlay as well */
@@ -507,9 +555,7 @@ overlayDrop.addEventListener('drop', e=>{
   const dt = new DataTransfer();
   Array.from(input.files || []).forEach(f=> dt.items.add(f));
   Array.from(e.dataTransfer.files || []).forEach(f=>{
-    if(activeSection === 'imgmerge'){
-      if(f.type && f.type.startsWith('image/')) dt.items.add(f);
-    } else dt.items.add(f);
+    dt.items.add(f);
   });
   input.files = dt.files; setListFromInput(activeSection); renderOverlayPreviewFromInput();
   overlayCount.textContent = (input.files.length || 0) + ' files';
@@ -517,27 +563,492 @@ overlayDrop.addEventListener('drop', e=>{
 
 /* paste event: allow Ctrl+V of images into overlay (clipboard images) */
 document.addEventListener('paste', (e)=>{
-  if(!activeSection) return;
+  if(!activeSection || !overlay.classList.contains('open')) return;
+  if(activeSection !== 'merge') return; // Only allow paste for merge section
+
   const items = Array.from(e.clipboardData?.items || []);
-  const imageItems = items.filter(it => it.kind === 'file' && it.type && it.type.startsWith('image/'));
-  if(!imageItems.length) return;
+  const fileItems = items.filter(it => it.kind === 'file');
+  if(!fileItems.length) return;
+
   const input = byId(activeSection+'Files');
   const dt = new DataTransfer();
   Array.from(input.files || []).forEach(f=> dt.items.add(f));
-  imageItems.forEach(it => { const file = it.getAsFile(); if(file) dt.items.add(file); });
+  fileItems.forEach(it => { const file = it.getAsFile(); if(file) dt.items.add(file); });
+
   input.files = dt.files; setListFromInput(activeSection); renderOverlayPreviewFromInput(); overlayCount.textContent = (input.files.length || 0) + ' files';
 });
 
 /* when any converter input changes, update overlay preview if it's the active section */
 converters.forEach(c=> byId(c.id+'Files').addEventListener('change', ()=>{ setListFromInput(c.id); if(activeSection === c.id) renderOverlayPreviewFromInput(); }));
 
+
+/* ---------- SETTINGS HELPER (NEW/UPDATED) ---------- */
+
+/**
+ * Retrieves the effective settings for a given file, prioritizing individual edits.
+ * @param {File} file The file object.
+ * @returns {object} The combined settings object.
+ */
+function getSettings(file) {
+    const defaults = { rotation: 0, flipX: 1, brightness: 0, contrast: 0, saturation: 0 };
+    
+    // 1. Individual Settings (highest priority)
+    const individual = individualFileSettings[file.name];
+    if (individual) {
+        // Check if any individual edit has been made (by comparing to defaults)
+        const hasIndividualEdit = Object.keys(defaults).some(k => individual[k] !== undefined && individual[k] !== defaults[k]);
+        
+        if (hasIndividualEdit) {
+            return { ...defaults, ...individual };
+        }
+    }
+
+    // 2. Global Settings (fallback for files without explicit individual edits)
+    if (activeSection === 'merge') {
+        return { ...defaults, ...globalMergeSettings };
+    }
+    
+    // 3. Default (no edits)
+    return defaults;
+}
+
+
+/* ---------- GLOBAL IMAGE EDITOR IMPLEMENTATION (NEW/UPDATED) ---------- */
+
+/**
+ * applyColorFilter: Canvas-based pixel manipulation for Brightness, Contrast, and Saturation.
+ */
+function applyColorFilter(canvas, brightness, contrast, saturation) {
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    const b = brightness / 100 * 255;
+    const c = (contrast + 100) / 100;
+    const S = (saturation / 100) + 1;
+    const L_R = 0.2126; const L_G = 0.7152; const L_B = 0.0722;
+
+    for (let i = 0; i < data.length; i += 4) {
+        let r = data[i], g = data[i + 1], b_val = data[i + 2];
+        r = Math.max(0, Math.min(255, ((r + b - 128) * c) + 128));
+        g = Math.max(0, Math.min(255, ((g + b - 128) * c) + 128));
+        b_val = Math.max(0, Math.min(255, ((b_val + b - 128) * c) + 128));
+
+        if (S !== 1) {
+            const avg = r * L_R + g * L_G + b_val * L_B;
+            r = avg * (1 - S) + r * S;
+            g = avg * (1 - S) + g * S;
+            b_val = avg * (1 - S) + b_val * S;
+        }
+
+        data[i] = Math.max(0, Math.min(255, r));
+        data[i + 1] = Math.max(0, Math.min(255, g));
+        data[i + 2] = Math.max(0, Math.min(255, b_val));
+    }
+    ctx.putImageData(imageData, 0, 0);
+}
+
+
+/**
+ * Loads an image onto a canvas, applies transformations, and color filters 
+ * based on the provided settings object. (Used for Images and Image Thumbnails)
+ */
+function applyImageEditsToCanvas(canvas, file, settings) {
+    return new Promise(async (resolve, reject) => {
+        // Use cached image if available
+        let img = imageCache[file.name];
+        if (!img) {
+            img = new Image();
+            const imgUrl = URL.createObjectURL(file);
+            img.onload = () => {
+                URL.revokeObjectURL(imgUrl);
+                imageCache[file.name] = img; // Cache for next use
+                processImage();
+                resolve(img);
+            };
+            img.onerror = (e) => {
+                URL.revokeObjectURL(imgUrl);
+                reject(new Error("Image load failed for editing."));
+            };
+            img.src = imgUrl;
+        } else {
+            // Wait for image load if it was not done yet (should not happen if cached)
+            if(!img.complete) {
+                img.onload = processImage;
+            } else {
+                processImage();
+            }
+            resolve(img);
+        }
+
+        function processImage() {
+            const ctx = canvas.getContext('2d');
+            const w_orig = img.naturalWidth;
+            const h_orig = img.naturalHeight;
+            const { rotation, flipX, brightness, contrast, saturation } = settings;
+
+            // 1. Calculate Canvas Dimensions based on Rotation
+            const isRotated = (rotation % 180) !== 0; // 90 or 270 degrees
+            let w = w_orig;
+            let h = h_orig;
+            if (isRotated) [w, h] = [h, w]; // Swap W/H if rotated
+
+            canvas.width = w;
+            canvas.height = h;
+            ctx.clearRect(0, 0, w, h);
+
+            // 2. Apply Geometric Transformations
+            ctx.save();
+            ctx.translate(w / 2, h / 2); // Move origin to center
+            ctx.scale(flipX, 1); // Apply flip
+            ctx.rotate(rotation * Math.PI / 180); // Apply rotation
+
+            // 3. Draw the original image centered back
+            ctx.drawImage(img, -w_orig / 2, -h_orig / 2, w_orig, h_orig);
+
+            // 4. Apply Color Filters (on the manipulated image data)
+            if (brightness !== 0 || contrast !== 0 || saturation !== 0) {
+                applyColorFilter(canvas, brightness, contrast, saturation);
+            }
+
+            ctx.restore(); // Restore context state
+        }
+    });
+}
+
+// Reset the global editor controls to default state
+function resetGlobalControls(redraw = true) {
+    globalMergeSettings.rotation = 0;
+    globalMergeSettings.flipX = 1;
+    globalMergeSettings.brightness = 0;
+    globalMergeSettings.contrast = 0;
+    globalMergeSettings.saturation = 0;
+
+    const brightnessSlider = byId('brightnessSlider');
+    const contrastSlider = byId('contrastSlider');
+    const saturationSlider = byId('saturationSlider');
+    
+    if (brightnessSlider) brightnessSlider.value = 0;
+    if (contrastSlider) contrastSlider.value = 0;
+    if (saturationSlider) saturationSlider.value = 0;
+    
+    if (byId('brightnessValue')) byId('brightnessValue').textContent = 0;
+    if (byId('contrastValue')) byId('contrastValue').textContent = 0;
+    if (byId('saturationValue')) byId('saturationValue').textContent = 0;
+    
+    if (redraw) renderOverlayPreviewFromInput();
+}
+
+let controlsWired = false;
+function wireGlobalControls() {
+    if (controlsWired) return;
+    
+    const brightnessSlider = byId('brightnessSlider');
+    const contrastSlider = byId('contrastSlider');
+    const saturationSlider = byId('saturationSlider');
+    const brightnessValueSpan = byId('brightnessValue');
+    const contrastValueSpan = byId('contrastValue');
+    const saturationValueSpan = byId('saturationValue');
+    const rotateBtn = byId('rotateBtn');
+    const flipXBtn = byId('flipXBtn');
+    const resetFiltersBtn = byId('resetFiltersBtn');
+    const resetTransformBtn = byId('resetTransformBtn');
+
+    const updateSettingsAndRedraw = () => {
+        globalMergeSettings.brightness = Number(brightnessSlider.value);
+        globalMergeSettings.contrast = Number(contrastSlider.value);
+        globalMergeSettings.saturation = Number(saturationSlider.value);
+        brightnessValueSpan.textContent = globalMergeSettings.brightness;
+        contrastValueSpan.textContent = globalMergeSettings.contrast;
+        saturationValueSpan.textContent = globalMergeSettings.saturation;
+        renderOverlayPreviewFromInput();
+    };
+
+    brightnessSlider.addEventListener('input', updateSettingsAndRedraw);
+    contrastSlider.addEventListener('input', updateSettingsAndRedraw);
+    saturationSlider.addEventListener('input', updateSettingsAndRedraw);
+
+    resetFiltersBtn.addEventListener('click', () => {
+        globalMergeSettings.brightness = 0;
+        globalMergeSettings.contrast = 0;
+        globalMergeSettings.saturation = 0;
+        brightnessSlider.value = 0;
+        contrastSlider.value = 0;
+        saturationSlider.value = 0;
+        updateSettingsAndRedraw();
+    });
+
+    rotateBtn.addEventListener('click', () => {
+        globalMergeSettings.rotation = (globalMergeSettings.rotation + 90) % 360;
+        renderOverlayPreviewFromInput();
+    });
+    
+    flipXBtn.addEventListener('click', () => {
+        globalMergeSettings.flipX *= -1;
+        renderOverlayPreviewFromInput();
+    });
+    
+    resetTransformBtn.addEventListener('click', () => {
+        globalMergeSettings.rotation = 0;
+        globalMergeSettings.flipX = 1;
+        renderOverlayPreviewFromInput();
+    });
+
+    controlsWired = true;
+}
+
+/* ---------- INDIVIDUAL FILE EDITOR IMPLEMENTATION (NEW) ---------- */
+
+const indBrightnessSlider = byId('indBrightnessSlider');
+const indContrastSlider = byId('indContrastSlider');
+const indSaturationSlider = byId('indSaturationSlider');
+const indBrightnessValueSpan = byId('indBrightnessValue');
+const indContrastValueSpan = byId('indContrastValue');
+const indSaturationValueSpan = byId('indSaturationValue');
+const indRotateBtn = byId('indRotateBtn');
+const indFlipXBtn = byId('indFlipXBtn');
+const indResetFiltersBtn = byId('indResetFiltersBtn');
+const indResetTransformBtn = byId('indResetTransformBtn');
+const currentFileNameSpan = byId('currentFileName');
+const indDoneBtn = byId('indDoneBtn');
+const indClearBtn = byId('indClearBtn');
+
+function openIndividualEditor(fileIndex, file) {
+    if (activeSection !== 'merge') return;
+    
+    const name = file.name.toLowerCase();
+    const isSupported = name.endsWith('.pdf') || file.type.startsWith('image/');
+    if (!isSupported) {
+        alert(`The file type (${file.type || name.split('.').pop()}) is not supported for individual editing.`);
+        return;
+    }
+
+    currentEditingFile = file;
+    
+    // Hide global elements
+    globalEditorContainer.classList.remove('active');
+    overlayDrop.style.display = 'none';
+    
+    // Show individual editor
+    individualEditorContainer.style.display = 'flex';
+    currentFileNameSpan.textContent = file.name;
+    
+    // Get current effective settings (individual or global)
+    const settings = getSettings(file);
+    
+    // Ensure the file has a key in individualFileSettings, defaulting to its current effective settings
+    if (!individualFileSettings[file.name]) {
+        individualFileSettings[file.name] = { 
+            rotation: settings.rotation, 
+            flipX: settings.flipX, 
+            brightness: settings.brightness, 
+            contrast: settings.contrast, 
+            saturation: settings.saturation, 
+        };
+    }
+
+    // Set initial slider values
+    indBrightnessSlider.value = settings.brightness;
+    indContrastSlider.value = settings.contrast;
+    indSaturationSlider.value = settings.saturation;
+    indBrightnessValueSpan.textContent = settings.brightness;
+    indContrastValueSpan.textContent = settings.contrast;
+    indSaturationValueSpan.textContent = settings.saturation;
+
+    // Update the preview area to show only the selected file
+    renderSingleFilePreview(file);
+
+    // Wire up controls (or re-wire for the current file)
+    wireIndividualControls(file);
+}
+
+function renderSingleFilePreview(file) {
+    overlayPreview.style.display = 'flex';
+    overlayPreview.innerHTML = '';
+    overlayCount.textContent = `Editing: ${file.name}`;
+
+    const card = document.createElement('div'); card.className='preview-card'; 
+    card.style.width='300px'; card.style.height='300px'; 
+    card.style.cursor='default'; card.style.margin='20px auto';
+    card.draggable = false;
+    
+    const previewEl = document.createElement('div');
+    previewEl.style.minHeight='200px'; 
+    previewEl.style.maxHeight='200px';
+    previewEl.style.display='flex';
+    previewEl.style.alignItems='center';
+    previewEl.style.justifyContent='center';
+    previewEl.style.position='relative';
+    
+    const canvas = document.createElement('canvas'); 
+    canvas.style.maxWidth='100%'; canvas.style.maxHeight='100%'; 
+    previewEl.appendChild(canvas);
+    
+    // Get current settings for the single file
+    const settings = individualFileSettings[file.name] || getSettings(file);
+    
+    // The individual editor only supports Image/PDF files. PDF preview logic for rotation/flip 
+    // is complex and already handled in renderOverlayPreviewFromInput, but here we only draw 
+    // to a canvas. For simplicity and reliability in the single preview mode, we only render 
+    // images accurately with color filters. PDF preview here will be basic/best effort.
+    
+    const isImageFile = file.name.toLowerCase().match(/\.(jpe?g|png|gif|bmp|webp)$/) || (file.type && file.type.startsWith('image/'));
+    
+    if (isImageFile) {
+        applyImageEditsToCanvas(canvas, file, settings).catch(e => {
+            console.error("Single File Preview Error:", e);
+            previewEl.innerHTML = '<div class="muted">Preview Error</div>';
+        });
+    } else if (file.name.toLowerCase().endsWith('.pdf')) {
+        // Render PDF preview (using logic from renderOverlayPreviewFromInput)
+        (async ()=>{
+            try{
+              const ab = await file.arrayBuffer();
+              const pdf = await pdfjsLib.getDocument({data:ab}).promise;
+              const page = await pdf.getPage(1);
+              
+              const { rotation, flipX } = settings;
+              const isRotated = rotation % 180 !== 0; 
+              
+              const viewport = page.getViewport({ scale: 0.8, rotation: rotation }); 
+
+              // Scale to fit the 300x300 preview box (max 200px height for canvas)
+              const ratio = Math.min(300/viewport.width, 200/viewport.height, 1);
+              const scaled = page.getViewport({ scale: ratio, rotation: rotation });
+
+              canvas.width = scaled.width; 
+              canvas.height = scaled.height;
+
+              const ctx = canvas.getContext('2d');
+              ctx.save();
+              if(flipX === -1) {
+                 if (isRotated) {
+                    ctx.translate(canvas.width / 2, canvas.height / 2);
+                    ctx.scale(-1, 1);
+                    ctx.translate(-canvas.width / 2, -canvas.height / 2);
+                 } else {
+                    ctx.translate(canvas.width, 0);
+                    ctx.scale(-1, 1);
+                 }
+              }
+
+              await page.render({ canvasContext: ctx, viewport: scaled }).promise;
+              ctx.restore(); 
+
+            }catch(e){ previewEl.innerHTML = '<div class="muted">PDF Preview Error</div>'; }
+        })();
+    } else {
+        previewEl.innerHTML = `<div class="muted">Preview not available for this type.</div>`;
+    }
+
+
+    const title = document.createElement('div'); title.className='muted'; title.style.marginTop='6px'; title.textContent = `File: ${file.name}`;
+    card.appendChild(previewEl); card.appendChild(title);
+    overlayPreview.appendChild(card);
+}
+
+
+let individualControlsWired = false;
+function wireIndividualControls(file) {
+    const key = file.name;
+    
+    const updateSettingsAndRedraw = () => {
+        const settings = individualFileSettings[key];
+        settings.brightness = Number(indBrightnessSlider.value);
+        settings.contrast = Number(indContrastSlider.value);
+        settings.saturation = Number(indSaturationSlider.value);
+        
+        indBrightnessValueSpan.textContent = settings.brightness;
+        indContrastValueSpan.textContent = settings.contrast;
+        indSaturationValueSpan.textContent = settings.saturation;
+        
+        renderSingleFilePreview(file); // Redraw the single file preview
+    };
+    
+    const handleResetFilters = () => {
+         individualFileSettings[key].brightness = 0;
+         individualFileSettings[key].contrast = 0;
+         individualFileSettings[key].saturation = 0;
+         indBrightnessSlider.value = 0;
+         indContrastSlider.value = 0;
+         indSaturationSlider.value = 0;
+         updateSettingsAndRedraw();
+    };
+
+    const handleRotate = () => {
+         let settings = individualFileSettings[key];
+         settings.rotation = ((settings.rotation || 0) + 90) % 360;
+         renderSingleFilePreview(file);
+    };
+    
+    const handleFlipX = () => {
+         let settings = individualFileSettings[key];
+         settings.flipX = (settings.flipX || 1) * -1;
+         renderSingleFilePreview(file);
+    };
+    
+    const handleResetTransform = () => {
+         individualFileSettings[key].rotation = 0;
+         individualFileSettings[key].flipX = 1;
+         renderSingleFilePreview(file);
+    };
+
+    const handleClearEdits = () => {
+        delete individualFileSettings[key];
+        closeIndividualEditor();
+    };
+
+
+    if (individualControlsWired) {
+         // Re-wire/update listeners for the current file
+         indBrightnessSlider.oninput = updateSettingsAndRedraw;
+         indContrastSlider.oninput = updateSettingsAndRedraw;
+         indSaturationSlider.oninput = updateSettingsAndRedraw;
+         
+         indResetFiltersBtn.onclick = handleResetFilters;
+         indRotateBtn.onclick = handleRotate;
+         indFlipXBtn.onclick = handleFlipX;
+         indResetTransformBtn.onclick = handleResetTransform;
+         
+         indDoneBtn.onclick = closeIndividualEditor;
+         indClearBtn.onclick = handleClearEdits;
+
+         return; 
+    }
+    
+    indBrightnessSlider.addEventListener('input', updateSettingsAndRedraw);
+    indContrastSlider.addEventListener('input', updateSettingsAndRedraw);
+    indSaturationSlider.addEventListener('input', updateSettingsAndRedraw);
+
+    indResetFiltersBtn.addEventListener('click', handleResetFilters);
+    indRotateBtn.addEventListener('click', handleRotate);
+    indFlipXBtn.addEventListener('click', handleFlipX);
+    indResetTransformBtn.addEventListener('click', handleResetTransform);
+
+    indDoneBtn.addEventListener('click', closeIndividualEditor);
+    indClearBtn.addEventListener('click', handleClearEdits);
+
+    individualControlsWired = true;
+}
+
+function closeIndividualEditor() {
+    currentEditingFile = null;
+    individualEditorContainer.style.display = 'none';
+    
+    // Restore global editor and preview list view
+    if (activeSection === 'merge') {
+        globalEditorContainer.classList.add('active'); // Restore global editor
+    }
+    overlayDrop.style.display = 'block';
+    
+    // Restore file count
+    overlayCount.textContent = (byId(activeSection+'Files').files.length || 0) + ' files';
+    
+    // Redraw the main preview with updated edits
+    renderOverlayPreviewFromInput();
+}
+
+
 /* ---------- render overlay preview (thumbnails or lightweight list) ---------- */
-/*
-  renderOverlayPreviewFromInput:
-  - For a small number of files we show thumbnails (images & first page of PDFs).
-  - For a huge number of files we show a compact textual list to keep UI responsive.
-  - Thumbnails use object URLs and pdf.js page render for PDF preview.
-*/
 async function renderOverlayPreviewFromInput(){
   overlayPreview.innerHTML=''; postMsg.innerHTML=''; lastResult=null; downloadBtn.style.display='none'; printBtn.style.display='none';
   if(!activeSection) return;
@@ -549,8 +1060,8 @@ async function renderOverlayPreviewFromInput(){
     return;
   }
 
-  const LARGE_THRESHOLD = 500; // switch to lightweight list beyond this count
-  const THUMB_LIMIT = 120; // how many thumbnails to attempt (saves memory)
+  const LARGE_THRESHOLD = 500;
+  const THUMB_LIMIT = 120;
 
   if(files.length > LARGE_THRESHOLD){
     // Build compact textual list for very large sets
@@ -560,12 +1071,20 @@ async function renderOverlayPreviewFromInput(){
       const left = document.createElement('div'); left.style.display='flex'; left.style.alignItems='center';
       const handle = document.createElement('div'); handle.className='drag-handle'; handle.textContent='☰';
       left.appendChild(handle);
-      const meta = document.createElement('div'); meta.textContent = `${i+1}. ${f.name}`; meta.style.marginLeft='8px';
+      const meta = document.createElement('div'); meta.textContent = `${i+1}. ${f.name} (${formatFileSize(f.size)})`; meta.style.marginLeft='8px';
       left.appendChild(meta);
       const right = document.createElement('div');
-      const openBtn = document.createElement('button'); openBtn.textContent='Open'; openBtn.addEventListener('click', ()=> openFileInNewTab(f));
-      const delBtn = document.createElement('button'); delBtn.className='secondary'; delBtn.textContent='Delete'; delBtn.addEventListener('click', ()=> overlayRemove(i));
-      right.appendChild(openBtn); right.appendChild(delBtn);
+      
+      // New: Add Edit button for merge section
+      if (activeSection === 'merge') {
+          const editBtn = document.createElement('button'); editBtn.textContent='Edit'; editBtn.className='secondary'; editBtn.style.marginRight='8px';
+          editBtn.addEventListener('click', (e)=> { e.stopPropagation(); openIndividualEditor(i, f); });
+          right.appendChild(editBtn);
+      }
+      
+      const viewBtn = document.createElement('button'); viewBtn.textContent='View'; viewBtn.addEventListener('click', (e)=> { e.stopPropagation(); openFileInNewTab(f); });
+      const delBtn = document.createElement('button'); delBtn.className='secondary'; delBtn.textContent='Delete'; delBtn.addEventListener('click', (e)=> { e.stopPropagation(); overlayRemove(i); });
+      right.appendChild(viewBtn); right.appendChild(delBtn);
       row.appendChild(left); row.appendChild(right);
       container.appendChild(row);
       // drag-drop reordering handlers within overlay list
@@ -582,6 +1101,18 @@ async function renderOverlayPreviewFromInput(){
   for(let i=0;i<files.length;i++){
     const f = files[i];
     const card = document.createElement('div'); card.className='preview-card'; card.draggable = true; card.dataset.index = i; card.style.color='#111';
+    
+    // NEW: Individual Edit Click Handler
+    if (activeSection === 'merge') {
+        card.addEventListener('click', ()=> openIndividualEditor(i, f)); // Click photo to edit
+        card.style.cursor = 'pointer';
+        if (individualFileSettings[f.name]) {
+             card.classList.add('individual-edit'); // Add border if edited
+        } else {
+             card.classList.remove('individual-edit');
+        }
+    }
+    
     // Drag-reorder support for preview cards
     card.addEventListener('dragstart', ev=>{ ev.dataTransfer.setData('text/plain', i); card.classList.add('dragging'); });
     card.addEventListener('dragend', ()=> card.classList.remove('dragging'));
@@ -596,11 +1127,25 @@ async function renderOverlayPreviewFromInput(){
     previewEl.style.position='relative';
 
     const name = f.name.toLowerCase();
+    
+    // Check if the file is an image
+    const isImageFile = name.match(/\.(jpe?g|png|gif|bmp|webp)$/) || (f.type && f.type.startsWith('image/'));
+
+    // Get the effective settings (individual or global)
+    const settings = getSettings(f);
 
     // show image thumbnail for common image types
-    if(i < THUMB_LIMIT && (name.match(/\.(jpe?g|png|gif|bmp|webp)$/) || (f.type && f.type.startsWith('image/')))){
-      const img = document.createElement('img'); img.src = URL.createObjectURL(f); img.onload = ()=> URL.revokeObjectURL(img.src);
-      previewEl.appendChild(img);
+    if(i < THUMB_LIMIT && isImageFile){
+      const canvas = document.createElement('canvas'); 
+      canvas.style.maxWidth='100%'; canvas.style.maxHeight='90px'; 
+      previewEl.appendChild(canvas);
+      
+      // Apply global/individual edits (including color filters) to the thumbnail
+      applyImageEditsToCanvas(canvas, f, settings).catch(e => {
+        console.error("Thumbnail edit failed:", e);
+        previewEl.innerHTML = '<div class="muted">Image Preview Error</div>';
+      });
+
     } else if(i < THUMB_LIMIT && name.endsWith('.pdf')){
       // For PDFs, render first page thumbnail using pdf.js
       const canvas = document.createElement('canvas'); canvas.style.maxWidth='100%'; canvas.style.maxHeight='90px'; previewEl.appendChild(canvas);
@@ -609,12 +1154,41 @@ async function renderOverlayPreviewFromInput(){
           const ab = await f.arrayBuffer();
           const pdf = await pdfjsLib.getDocument({data:ab}).promise;
           const page = await pdf.getPage(1);
-          const viewport = page.getViewport({ scale: 0.8 });
+          
+          const { rotation, flipX } = settings;
+          const isRotated = rotation % 180 !== 0; // 90 or 270 degrees
+          
+          // 1. Calculate PDF viewport with rotation applied
+          const viewport = page.getViewport({ scale: 0.8, rotation: rotation }); 
+
+          // 2. Adjust canvas size based on final rotated dimensions
           const ratio = Math.min(150/viewport.width, 90/viewport.height, 1);
-          const scaled = page.getViewport({ scale: ratio });
-          canvas.width = scaled.width; canvas.height = scaled.height;
+          const scaled = page.getViewport({ scale: ratio, rotation: rotation });
+
+          canvas.width = scaled.width; 
+          canvas.height = scaled.height;
+
           const ctx = canvas.getContext('2d');
+
+          // 3. Apply flip transformation before rendering PDF page content
+          ctx.save();
+          if(flipX === -1) {
+             // For flip, translate to the center and flip the x-axis, then translate back
+             if (isRotated) {
+                // If rotated and flipped: need to flip around the new center
+                ctx.translate(canvas.width / 2, canvas.height / 2);
+                ctx.scale(-1, 1);
+                ctx.translate(-canvas.width / 2, -canvas.height / 2);
+             } else {
+                ctx.translate(canvas.width, 0);
+                ctx.scale(-1, 1);
+             }
+          }
+
+          // Render PDF page with the calculated rotated viewport
           await page.render({ canvasContext: ctx, viewport: scaled }).promise;
+          ctx.restore(); // Restore context state
+
         }catch(e){ previewEl.innerHTML = '<div class="muted">Preview error</div>'; }
       })();
     } else {
@@ -623,21 +1197,21 @@ async function renderOverlayPreviewFromInput(){
       const icon = document.createElement('div'); icon.innerHTML = `<div style="font-weight:700;font-size:18px">${escapeHtml(ext)}</div>`; previewEl.appendChild(icon);
     }
 
-    const title = document.createElement('div'); title.className='muted'; title.style.marginTop='6px'; title.textContent = `${i+1}. ${f.name}`;
+    // Added file size to the title line
+    const title = document.createElement('div'); title.className='muted'; title.style.marginTop='6px'; title.textContent = `${i+1}. ${f.name} (${formatFileSize(f.size)})`;
     const actions = document.createElement('div'); actions.className='preview-actions';
-    const openBtn = document.createElement('button'); openBtn.textContent='Open'; openBtn.addEventListener('click', ()=> openFileInNewTab(f));
-    const editBtn = document.createElement('button'); editBtn.className='secondary'; editBtn.textContent='Edit'; editBtn.addEventListener('click', ()=> openImageEditor(i));
-    const delBtn = document.createElement('button'); delBtn.className='secondary'; delBtn.textContent='Delete'; delBtn.addEventListener('click', ()=> overlayRemove(i));
-    actions.appendChild(openBtn); actions.appendChild(editBtn); actions.appendChild(delBtn);
+    
+    // Add View and Delete buttons (Edit is handled by card click now)
+    const viewBtn = document.createElement('button'); viewBtn.textContent='View'; viewBtn.addEventListener('click', (e)=> { e.stopPropagation(); openFileInNewTab(f); });
+    const delBtn = document.createElement('button'); delBtn.className='secondary'; delBtn.textContent='Delete'; delBtn.addEventListener('click', (e)=> { e.stopPropagation(); overlayRemove(i); });
+    actions.appendChild(viewBtn); actions.appendChild(delBtn);
 
     card.appendChild(previewEl); card.appendChild(title); card.appendChild(actions);
     overlayPreview.appendChild(card);
   }
 }
 
-/* reorderFiles: reorders files inside an <input type=file> by index
-   - We must rebuild a DataTransfer because input.files is read-only
-   - After reordering we call setListFromInput to update UI display */
+/* reorderFiles: reorders files inside an <input type=file> by index */
 function reorderFiles(inputEl, fromIndex, toIndex){
   const files = Array.from(inputEl.files || []);
   if(fromIndex < 0 || toIndex < 0 || fromIndex >= files.length || toIndex > files.length) return;
@@ -647,14 +1221,25 @@ function reorderFiles(inputEl, fromIndex, toIndex){
   files.forEach(f=> dt.items.add(f));
   inputEl.files = dt.files;
   setListFromInput(activeSection);
+  
+  // NOTE: Reordering can mess up individualFileSettings if keyed by index. 
+  // Since we key by file.name, we don't need to update individualFileSettings.
 }
 
 /* Remove (delete) a single file from the active section input */
 function overlayRemove(index){
   if(!activeSection) return;
   const input = byId(activeSection+'Files');
+  const files = Array.from(input.files || []);
+  const fileToRemove = files[index];
+  
+  // Remove file from individual settings if it exists
+  if (fileToRemove && individualFileSettings[fileToRemove.name]) {
+      delete individualFileSettings[fileToRemove.name];
+  }
+  
   const dt = new DataTransfer();
-  Array.from(input.files || []).forEach((f,i)=> { if(i!==index) dt.items.add(f); });
+  files.forEach((f,i)=> { if(i!==index) dt.items.add(f); });
   input.files = dt.files;
   setListFromInput(activeSection);
   renderOverlayPreviewFromInput();
@@ -673,121 +1258,167 @@ function openFileInNewTab(file){
 /* Utility: read a File as ArrayBuffer (promisified FileReader) */
 const readAsArrayBuffer = (file) => new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsArrayBuffer(file); });
 
-/* ---------- conversion implementations ---------- */
-/*
-  Each converter function returns an object:
-    { blob: Blob, filename: string, mime: string }
-  The Submit handler (below) calls the function and manages download/print UI.
-*/
+/* ---------- conversion implementations (UPDATED) ---------- */
 
-/* MERGE PDFs (client-side using pdf-lib)
-   - Loads each selected PDF
-   - Copies pages into a new PDF document
-   - Returns resulting PDF blob
-*/
-async function doMergePDFs(){
+/* MERGE ANY FILE (PDFs and Images) (client-side using pdf-lib) */
+async function doMergeAnyFileToPdf(){
   const input = byId('mergeFiles');
-  if(!input.files.length) throw new Error('No PDF files selected');
-  const outPdf = await PDFLib.PDFDocument.create();
-  for(const f of Array.from(input.files)){
-    const bytes = await f.arrayBuffer();
-    const src = await PDFLib.PDFDocument.load(bytes);
-    const pages = await outPdf.copyPages(src, src.getPageIndices());
-    pages.forEach(p=> outPdf.addPage(p));
+  if(!input.files.length) throw new Error('No files selected');
+  const files = Array.from(input.files);
+
+  const pdfDoc = await PDFLib.PDFDocument.create();
+  const unsupportedFiles = [];
+  const filesToProcess = files.sort((a,b)=>a.name.localeCompare(b.name));
+
+  const [pageW, pageH] = [595.28, 841.89];
+  const margin = 50;
+  const maxW = pageW - margin*2;
+  const maxH = pageH - margin*2;
+  const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+  
+  // const { rotation: globalRotation, flipX: globalFlipX } = globalMergeSettings; // OLD
+
+  for(const f of filesToProcess){
+    try{
+      const type = f.type.toLowerCase();
+      const filename = f.name.toLowerCase();
+      
+      // Get the effective settings for the current file
+      const { rotation, flipX, brightness, contrast, saturation } = getSettings(f);
+
+      if(type === 'application/pdf' || filename.endsWith('.pdf')){
+        // --- Process PDF: Apply File-Specific Transforms (Rotation/Flip) ---
+        const bytes = await f.arrayBuffer();
+        const src = await PDFLib.PDFDocument.load(bytes);
+        
+        // Copy pages
+        const pages = await pdfDoc.copyPages(src, src.getPageIndices());
+        
+        // Apply rotation and flip to each page before adding it to the new document
+        pages.forEach(p=> {
+            // Apply rotation (0, 90, 180, 270)
+            if (rotation !== 0) {
+                p.setRotation(PDFLib.degrees(rotation)); 
+            }
+
+            // Apply flip transformation
+            if (flipX === -1) {
+                // Horizontal flip (scaleX=-1) combined with a translation to bring content back on the page
+                const width = p.getWidth(); 
+                p.setTransformationMatrix([
+                    -1, 0,
+                     0, 1,
+                    width, 0,
+                ]);
+            }
+            pdfDoc.addPage(p);
+        });
+
+      } else if(type.startsWith('image/') || filename.match(/\.(jpe?g|png|gif|bmp|webp)$/)){
+        // --- Process Image with File-Specific Edits (Transforms + Color Filters) ---
+        
+        // 1. Create a temporary canvas for full-resolution drawing and editing
+        const tempCanvas = document.createElement('canvas');
+        const img = imageCache[f.name] || new Image();
+        if (!img.src) img.src = URL.createObjectURL(f);
+        
+        // Ensure image is loaded before processing
+        await new Promise(resolve => {
+            if (img.complete) return resolve();
+            img.onload = resolve;
+        });
+
+        // 2. Apply all file-specific edits (rotation, flip, color filters) to the canvas
+        // We pass the file-specific settings here
+        await applyImageEditsToCanvas(tempCanvas, f, { rotation, flipX, brightness, contrast, saturation });
+
+        // 3. Get the edited image data as a PNG ArrayBuffer (high quality)
+        const arr = await new Promise((resolve, reject) => {
+            tempCanvas.toBlob(blob => {
+                if(!blob) return reject(new Error('Canvas to Blob failed.'));
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsArrayBuffer(blob);
+            }, 'image/png'); 
+        });
+
+        // 4. Embed and draw the edited image to a new PDF page
+        const embedded = await pdfDoc.embedPng(arr);
+        const page = pdfDoc.addPage([pageW, pageH]);
+        const imgDims = embedded.scale(1);
+        
+        // Calculate scale to fit within page margins
+        const scale = Math.min(maxW / imgDims.width, maxH / imgDims.height, 1);
+        const drawW = imgDims.width * scale;
+        const drawH = imgDims.height * scale;
+        const x = (pageW - drawW)/2;
+        const y = (pageH - drawH)/2;
+        page.drawImage(embedded, { x, y, width: drawW, height: drawH });
+
+      } else {
+        // --- Unsupported File Type: Add a simple page with a note ---
+        unsupportedFiles.push(f.name);
+        const page = pdfDoc.addPage([pageW, pageH]);
+        page.drawText(`File skipped (unsupported for merging): ${f.name}`, { x: 50, y: pageH - 50, size: 16, font: font });
+        page.drawText(`Type: ${f.type || 'unknown'}`, { x: 50, y: pageH - 70, size: 12, font: font });
+        page.drawText('Supported types are PDF and Images (JPG/PNG/etc.)', { x: 50, y: pageH - 100, size: 12, font: font });
+      }
+    }catch(e){
+      console.error(`Error processing file ${f.name}:`, e);
+      unsupportedFiles.push(f.name + ' (Processing Error)');
+    }
   }
-  const merged = await outPdf.save();
-  return { blob: new Blob([merged],{type:'application/pdf'}), filename: 'merged.pdf', mime: 'application/pdf' };
+
+  if(pdfDoc.getPages().length === 0) throw new Error('No supported files were processed.');
+
+  const merged = await pdfDoc.save();
+  const filename = unsupportedFiles.length ? 'merged-with-skips.pdf' : 'merged.pdf';
+
+  return { blob: new Blob([merged],{type:'application/pdf'}), filename: filename, mime: 'application/pdf' };
 }
 
-/* PDF -> DOCX
-  /* ===============================================
-   📝 PDF → DOCX Converter (Auto-loads docx library)
-   -----------------------------------------------
-   Converts a selected PDF file into a DOCX Word file.
-   If the DOCX library isn't loaded, it downloads it automatically.
-   =============================================== */
+
+/* PDF -> DOCX (client-side approximation) */
 async function doPdfToDocx() {
+  const inEl = document.getElementById('pdf2docxFiles'); 
+  if (!inEl || !inEl.files[0]) throw new Error('Please select a PDF file first.'); 
+  if (!window.pdfjsLib) throw new Error('The PDF.js library failed to load.');
 
-  // 🔹 STEP 1 — Get the input element and check for a selected PDF
-  const inEl = document.getElementById('pdf2docxFiles'); // <input type="file" id="pdf2docxFiles">
-  if (!inEl || !inEl.files[0]) 
-    throw new Error('Please select a PDF file first.'); // Stop if no file is chosen
-
-  // 🔹 STEP 2 — Check that PDF.js is available (needed to read PDF text)
-  if (!window.pdfjsLib) {
-    throw new Error('The PDF.js library failed to load.');
-  }
-
-  // 🔹 STEP 3 — Check if DOCX library is loaded, if not, load it dynamically
   if (!window.docx) {
-    // Creates a <script> tag to load the library from CDN
     await new Promise((resolve, reject) => {
       const script = document.createElement('script');
       script.src = "https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js";
-      script.onload = () => {
-        // When loaded, confirm it actually defined window.docx
-        if (window.docx) resolve();
-        else reject(new Error("DOCX script loaded but window.docx is still undefined."));
-      };
+      script.onload = () => { if (window.docx) resolve(); else reject(new Error("DOCX script failed to define window.docx.")); };
       script.onerror = () => reject(new Error("Failed to load DOCX library from CDN."));
-      document.head.appendChild(script); // Add <script> into <head>
+      document.head.appendChild(script); 
     });
   }
 
-  // 🔹 STEP 4 — Extract tools (classes) from the DOCX library
-  // These are used to build a Word document
   const { Document, Paragraph, Packer } = window.docx;
-
-  // 🔹 STEP 5 — Read the uploaded PDF file as raw bytes
   const file = inEl.files[0];
   const fbytes = await file.arrayBuffer();
-
-  // 🔹 STEP 6 — Use PDF.js to open and read all PDF pages
   const pdf = await pdfjsLib.getDocument({ data: fbytes }).promise;
-
-  // We'll store text paragraphs from each page here
   const paragraphs = [];
 
-  // 🔹 STEP 7 — Loop through every page of the PDF
   for (let p = 1; p <= pdf.numPages; p++) {
-    const page = await pdf.getPage(p);                // Get one page
-    const content = await page.getTextContent();      // Get the text content
-    const text = content.items.map(i => i.str || '').join(' '); // Combine all text strings
-
-    // Add the text to our paragraphs array
-    paragraphs.push(`— Page ${p} —`); // Page separator
-    paragraphs.push(text.trim());      // Actual text
+    const page = await pdf.getPage(p);                
+    const content = await page.getTextContent();      
+    const text = content.items.map(i => i.str || '').join(' '); 
+    paragraphs.push(new Paragraph(`— Page ${p} —`));
+    paragraphs.push(new Paragraph(text.trim()));     
   }
 
-  // 🔹 STEP 8 — Create a new DOCX document
-  const doc = new Document({
-    sections: [
-      {
-        // Convert each paragraph string into a Word Paragraph object
-        children: paragraphs.map(t => new Paragraph(t)),
-      },
-    ],
-  });
-
-  // 🔹 STEP 9 — Generate the DOCX file as a Blob (file-like object)
+  const doc = new Document({ sections: [{ children: paragraphs }] });
   const blob = await Packer.toBlob(doc);
-
-  // 🔹 STEP 10 — Create a nice filename for the output
   const filename = (file.name.replace(/\.pdf$/i, '') || 'document') + '.docx';
-
-  // MIME type for Word documents
   const mime = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
-  // 🔹 STEP 11 — Return the result (your main system will handle saving/downloading)
   return { blob, filename, mime };
 }
 
 
-/* DOCX -> PDF (client-side approximation)
-   - Uses mammoth to convert docx -> HTML/text.
-   - Uses pdfmake to render the extracted blocks into a PDF.
-   - Note: this preserves textual content and headings roughly, but not full Word layout.
-*/
+/* DOCX -> PDF (client-side approximation) */
 async function doDocxToPdf(){
   const inEl = byId('docx2pdfFiles');
   if(!inEl || !inEl.files[0]) throw new Error('Pick a .docx file');
@@ -795,18 +1426,13 @@ async function doDocxToPdf(){
   const result = await mammoth.convertToHtml({ arrayBuffer: ab });
   const tmp = document.createElement('div'); tmp.innerHTML = result.value;
 
-  // Build a simple array of text blocks from headings and paragraphs
   const textBlocks = Array.from(tmp.querySelectorAll('p, h1, h2, h3, h4, h5, h6')).map(el=> ({ text: el.textContent, margin:[0,4,0,4] }));
   const docDef = { content: textBlocks, defaultStyle:{ fontSize:11 } };
 
-  // pdfMake API: create PDF and return blob via callback
   return new Promise((res,rej)=> pdfMake.createPdf(docDef).getBlob(blob => res({ blob, filename: (inEl.files[0].name.replace(/\.docx$/i,'')||'document') + '.pdf', mime:'application/pdf' })));
 }
 
-/* XLSX -> PDF (client-side)
-   - Read the first worksheet and build a basic table using pdfmake
-   - This is intended for simple spreadsheets; very complex sheets may need server processing.
-*/
+/* XLSX -> PDF (client-side) */
 async function doXlsxToPdf(){
   const inEl = byId('xls2pdfFiles'); if(!inEl || !inEl.files[0]) throw new Error('Pick an .xlsx file');
   const ab = await readAsArrayBuffer(inEl.files[0]);
@@ -822,9 +1448,7 @@ async function doXlsxToPdf(){
   return new Promise((res,rej)=> pdfMake.createPdf(docDef).getBlob(blob => res({ blob, filename: (inEl.files[0].name.replace(/\.xlsx$/i,'')||'sheet') + '.pdf', mime:'application/pdf' })));
 }
 
-/* PDF -> XLSX (text extraction)
-   - Extracts page text and puts each page in a row. Good for structured text PDFs but not tables.
-*/
+/* PDF -> XLSX (text extraction) */
 async function doPdfToXlsx(){
   const inEl = byId('pdf2xlsFiles'); if(!inEl || !inEl.files[0]) throw new Error('Pick a PDF file');
   const ab = await readAsArrayBuffer(inEl.files[0]);
@@ -843,9 +1467,7 @@ async function doPdfToXlsx(){
   return { blob: new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}), filename: (inEl.files[0].name.replace(/\.pdf$/i,'')||'pdf') + '.xlsx', mime:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
 }
 
-/* DOCX -> XLSX (paragraph extraction)
-   - Uses mammoth.extractRawText to get paragraphs, then writes each paragraph into an Excel row.
-*/
+/* DOCX -> XLSX (paragraph extraction) */
 async function doDocxToXlsx(){
   const inEl = byId('docx2xlsFiles'); if(!inEl || !inEl.files[0]) throw new Error('Pick a .docx file');
   const ab = await readAsArrayBuffer(inEl.files[0]);
@@ -859,10 +1481,7 @@ async function doDocxToXlsx(){
   return { blob: new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}), filename: (inEl.files[0].name.replace(/\.docx$/i,'')||'doc') + '.xlsx', mime:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
 }
 
-/* XLSX -> DOCX
-   - Reads first sheet and builds a simple Word table using the docx library.
-   - Each row in the sheet becomes a table row in the Word doc.
-*/
+/* XLSX -> DOCX (table creation) */
 async function doXlsxToDocx(){
   const inEl = byId('xls2docxFiles'); if(!inEl || !inEl.files[0]) throw new Error('Pick an .xlsx file');
   const ab = await readAsArrayBuffer(inEl.files[0]);
@@ -881,134 +1500,18 @@ async function doXlsxToDocx(){
   return { blob, filename: (inEl.files[0].name.replace(/\.xlsx$/i,'')||'sheet') + '.docx', mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' };
 }
 
-/* ---------- IMAGES -> MERGE (TOGETHER OR INDIVIDUAL PAGES) ---------- */
-/*
-  doImageMergeToPdf:
-  - Reads image files (with optional per-image edits from imageEdits)
-  - Embeds each image into a PDF page sized by selected paper (A4/A3/Letter/Custom)
-  - If mode === 'individual' then each image on its own page;
-    'together' currently behaves same as 'individual' but kept for future layout options.
-*/
-async function doImageMergeToPdf(){
-  const inEl = byId('imgmergeFiles');
-  if(!inEl || !inEl.files.length) throw new Error('No images selected');
-  const files = Array.from(inEl.files);
-
-  const mm2pt = mm => mm * 2.8346456693; // convert millimeters to PDF points (approx.)
-  let wmm,hmm;
-  const ps = paperSizeEl.value;
-  if(ps === 'A4'){ wmm = 210; hmm = 297; }
-  else if(ps === 'A3'){ wmm = 297; hmm = 420; }
-  else if(ps === 'Letter'){ wmm = 216; hmm = 279; }
-  else { wmm = Number(customW.value) || 210; hmm = Number(customH.value) || 297; }
-
-  const orient = document.querySelector('input[name="orient"]:checked').value;
-  let pageW = mm2pt(orient === 'portrait' ? wmm : hmm);
-  let pageH = mm2pt(orient === 'portrait' ? hmm : wmm);
-
-  const mode = document.querySelector('input[name="imgMode"]:checked').value; // individual or together
-  const globalBrightness = Number(brightnessEl.value)/100;
-  const globalContrast = Number(contrastEl.value)/100;
-
-  const pdfDoc = await PDFLib.PDFDocument.create();
-
-  // processImageToArrayBuffer: draws image to a canvas, applies crop/resize/filters, returns PNG bytes
-  async function processImageToArrayBuffer(file){
-    const key = file.name + '__' + file.lastModified;
-    const edit = imageEdits.get(key);
-    const imgBitmap = await createImageBitmap(file);
-
-    // crop coordinates and sizes are in natural image pixel units (not canvas)
-    let sx = 0, sy = 0, sw = imgBitmap.width, sh = imgBitmap.height;
-    if(edit && edit.crop){ sx = Math.max(0, Math.floor(edit.crop.x)); sy = Math.max(0, Math.floor(edit.crop.y)); sw = Math.max(1, Math.floor(edit.crop.w)); sh = Math.max(1, Math.floor(edit.crop.h)); }
-
-    // destination width/height: either edited size or actual crop size
-    let dw = sw, dh = sh;
-    if(edit && edit.resize && edit.resize.w && edit.resize.h){ dw = Math.max(1, Math.floor(edit.resize.w)); dh = Math.max(1, Math.floor(edit.resize.h)); }
-
-    const canvas = document.createElement('canvas'); canvas.width = dw; canvas.height = dh;
-    const ctx = canvas.getContext('2d');
-
-    // choose filter settings either from per-image edit or global sliders
-    const b = (edit && edit.brightness!=null) ? edit.brightness : globalBrightness;
-    const c = (edit && edit.contrast!=null) ? edit.contrast : globalContrast;
-    ctx.filter = `brightness(${b*100}%) contrast(${c*100}%)`;
-
-    // draw the (cropped) source to canvas with scaling if needed
-    ctx.drawImage(imgBitmap, sx, sy, sw, sh, 0, 0, dw, dh);
-
-    const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
-    return await blob.arrayBuffer();
-  }
-
-  // embed images into PDF pages
-  if(mode === 'individual'){
-    for(const f of files){
-      try{
-        const arr = await processImageToArrayBuffer(f);
-        const embedded = await pdfDoc.embedPng(arr);
-        const page = pdfDoc.addPage([pageW, pageH]);
-        const imgDims = embedded.scale(1);
-        const margin = mm2pt(10);
-        const maxW = pageW - margin*2;
-        const maxH = pageH - margin*2;
-        const scale = Math.min(maxW / imgDims.width, maxH / imgDims.height, 1);
-        const drawW = imgDims.width * scale;
-        const drawH = imgDims.height * scale;
-        const x = (pageW - drawW)/2;
-        const y = (pageH - drawH)/2;
-        page.drawImage(embedded, { x, y, width: drawW, height: drawH });
-      } catch(e){ console.error('img error', e); }
-    }
-  } else {
-    // 'together' currently same as individual — placeholder for future layout combining
-    for(const f of files){
-      try{
-        const arr = await processImageToArrayBuffer(f);
-        const embedded = await pdfDoc.embedPng(arr);
-        const page = pdfDoc.addPage([pageW, pageH]);
-        const imgDims = embedded.scale(1);
-        const margin = mm2pt(10);
-        const maxW = pageW - margin*2;
-        const maxH = pageH - margin*2;
-        const scale = Math.min(maxW / imgDims.width, maxH / imgDims.height, 1);
-        const drawW = imgDims.width * scale;
-        const drawH = imgDims.height * scale;
-        const x = (pageW - drawW)/2;
-        const y = (pageH - drawH)/2;
-        page.drawImage(embedded, { x, y, width: drawW, height: drawH });
-      } catch(e){ console.error('img error', e); }
-    }
-  }
-
-  const out = await pdfDoc.save();
-  return { blob: new Blob([out], { type:'application/pdf' }), filename: 'images-merged.pdf', mime: 'application/pdf' };
-}
-
 /* ---------- mapping: section id -> function ---------- */
-/*
-  This mapping allows the common Submit handler to call the right converter function
-  based on which overlay (section) the user opened.
-*/
 const sectionToAction = {
-  merge: doMergePDFs,
+  merge: doMergeAnyFileToPdf,
   pdf2docx: doPdfToDocx,
   docx2pdf: doDocxToPdf,
   xls2pdf: doXlsxToPdf,
   pdf2xls: doPdfToXlsx,
   docx2xls: doDocxToXlsx,
-  xls2docx: doXlsxToDocx,
-  imgmerge: doImageMergeToPdf
+  xls2docx: doXlsxToDocx
 };
 
 /* ---------- Submit handler: call conversion and surface result ---------- */
-/*
-  Behavior:
-  - Disables Submit button while working
-  - Calls the mapped conversion function
-  - Shows a success message and enables Download / Print buttons
-  - Print is enabled only for PDFs (browser print)
-*/
 submitBtn.addEventListener('click', async ()=>{
   if(!activeSection) return alert('No active converter.');
   submitBtn.disabled=true;
@@ -1021,7 +1524,7 @@ submitBtn.addEventListener('click', async ()=>{
     if(!func) throw new Error('No action found.');
     const result = await func();
     lastResult = result;
-    postMsg.innerHTML = `<div style="margin-top:8px;color:green">Done: ${escapeHtml(result.filename)}</div>`;
+    postMsg.innerHTML = `<div class="success" style="margin-top:8px">Done: ${escapeHtml(result.filename)}</div>`;
     downloadBtn.style.display=''; downloadBtn.onclick = ()=> saveBlob(result.blob, result.filename);
     if(result.mime === 'application/pdf'){
       printBtn.style.display='';
@@ -1038,7 +1541,7 @@ submitBtn.addEventListener('click', async ()=>{
     }
   }catch(err){
     console.error(err);
-    postMsg.innerHTML = `<div style="margin-top:8px;color:red">Error: ${escapeHtml(err.message || String(err))}</div>`;
+    postMsg.innerHTML = `<div class="error" style="margin-top:8px">Error: ${escapeHtml(err.message || String(err))}</div>`;
   } finally{
     submitBtn.disabled=false;
     submitBtn.textContent='Submit';
@@ -1046,10 +1549,6 @@ submitBtn.addEventListener('click', async ()=>{
 });
 
 /* ---------- UI: background toggle button ---------- */
-/*
-  Allows user to toggle between gradient and photo background.
-  This is purely cosmetic; no functional behavior depends on it.
-*/
 const toggleBtn = document.getElementById('toggleBgBtn');
 const body = document.body;
 let bgVisible = true; // starts with image shown
@@ -1066,184 +1565,6 @@ toggleBtn.addEventListener('click', () => {
     bgVisible = true;
     toggleBtn.textContent = "🌅 Hide Background";
   }
-});
-
-/* ---------- image editor implementation (live crop + resize + filters) ---------- */
-/*
-  Image editor is a lightweight in-browser editor:
-  - openImageEditor(index): loads file at index from imgmergeFiles into an <canvas>
-  - drawEditorCanvas(): shows preview scaled to canvas and draws crop rectangle overlay
-  - mouse events allow user to drag to select crop area
-  - applyCrop: saves edit settings into imageEdits map for later PDF merging
-*/
-
-/* editor DOM refs */
-const imgEditor = byId('imgEditor');
-const editCanvas = byId('editCanvas'); const editCtx = editCanvas.getContext('2d');
-const cropRectEl = byId('cropRect');
-const resizeW = byId('resizeW'), resizeH = byId('resizeH'), keepAspect = byId('keepAspect');
-const editBrightness = byId('editBrightness'), editContrast = byId('editContrast');
-const closeEditor = byId('closeEditor'), applyCrop = byId('applyCrop'), resetCrop = byId('resetCrop');
-
-let currentEditIndex = null;        // which image index is being edited
-let currentImageBitmap = null;      // ImageBitmap used to draw and read pixels
-let dragStart = null;               // pointer start for crop selection
-let currentCrop = null;             // {x,y,w,h} in natural image pixels
-let naturalAspect = 1;              // width/height ratio of original image
-
-/* Open image editor for a given image index (from imgmergeFiles) */
-function openImageEditor(index){
-  const input = byId('imgmergeFiles');
-  const file = (input.files || [])[index];
-  if(!file) return alert('File not found');
-  currentEditIndex = index;
-  const key = file.name + '__' + file.lastModified;
-  const edit = imageEdits.get(key) || {};
-
-  // createImageBitmap is efficient and avoids decoding to canvas directly
-  createImageBitmap(file).then(bitmap => {
-    currentImageBitmap = bitmap;
-    naturalAspect = bitmap.width / bitmap.height;
-
-    // compute a reasonable display size for the canvas while preserving aspect ratio
-    const maxW = Math.min(800, window.innerWidth - 420);
-    const maxH = Math.min(600, window.innerHeight - 200);
-    let scale = Math.min(maxW/bitmap.width, maxH/bitmap.height, 1);
-    editCanvas.width = Math.floor(bitmap.width * scale);
-    editCanvas.height = Math.floor(bitmap.height * scale);
-
-    // restore crop & resize values if previously edited
-    if(edit.crop){ currentCrop = Object.assign({}, edit.crop); }
-    else { currentCrop = { x:0, y:0, w:bitmap.width, h:bitmap.height }; }
-
-    if(edit.resize){ resizeW.value = edit.resize.w; resizeH.value = edit.resize.h; }
-    else { resizeW.value = bitmap.width; resizeH.value = bitmap.height; }
-
-    editBrightness.value = Math.round(((edit.brightness!=null?edit.brightness:1)*100));
-    editContrast.value = Math.round(((edit.contrast!=null?edit.contrast:1)*100));
-
-    drawEditorCanvas();
-    imgEditor.style.display='block';
-  });
-}
-
-/* drawEditorCanvas: render preview and overlay of crop box */
-function drawEditorCanvas(){
-  if(!currentImageBitmap) return;
-  // compute display scale to convert between natural image coords and canvas coords
-  const dispScaleX = editCanvas.width / currentImageBitmap.width;
-  const dispScaleY = editCanvas.height / currentImageBitmap.height;
-
-  editCtx.clearRect(0,0,editCanvas.width,editCanvas.height);
-  // apply preview filters locally via canvas context filter (not persisted to file until apply)
-  const b = Number(editBrightness.value)/100;
-  const c = Number(editContrast.value)/100;
-  editCtx.filter = `brightness(${b*100}%) contrast(${c*100}%)`;
-
-  // draw the full image scaled to canvas
-  editCtx.drawImage(currentImageBitmap, 0, 0, currentImageBitmap.width, currentImageBitmap.height, 0, 0, editCanvas.width, editCanvas.height);
-
-  // if there is a crop region, draw a translucent overlay and a clearer crop area above it
-  if(currentCrop){
-    const x = Math.max(0, Math.floor(currentCrop.x * dispScaleX));
-    const y = Math.max(0, Math.floor(currentCrop.y * dispScaleY));
-    const w = Math.max(1, Math.floor(currentCrop.w * dispScaleX));
-    const h = Math.max(1, Math.floor(currentCrop.h * dispScaleY));
-
-    // position the absolute cropRect element to visually show the selected area on the page
-    cropRectEl.style.display='block';
-    cropRectEl.style.left = (editCanvas.getBoundingClientRect().left + x) + 'px';
-    cropRectEl.style.top = (editCanvas.getBoundingClientRect().top + y) + 'px';
-    cropRectEl.style.width = w + 'px';
-    cropRectEl.style.height = h + 'px';
-
-    // dim entire canvas to show the crop area more clearly
-    editCtx.save(); editCtx.fillStyle = 'rgba(0,0,0,0.35)'; editCtx.fillRect(0,0,editCanvas.width,editCanvas.height); editCtx.restore();
-
-    // redraw the cropped area on top without the dimming so it's visible
-    editCtx.save();
-    editCtx.filter = `brightness(${b*100}%) contrast(${c*100}%)`;
-    editCtx.drawImage(currentImageBitmap, currentCrop.x, currentCrop.y, currentCrop.w, currentCrop.h, x, y, w, h);
-    editCtx.restore();
-  } else {
-    cropRectEl.style.display='none';
-  }
-}
-
-/* ---------- interactions for drawing crop rectangle ---------- */
-/*
-  The crop selection uses mouse down/move/up on the canvas.
-  We convert between canvas display coords and natural image pixel coords.
-*/
-let isDragging = false;
-let start = null;
-
-editCanvas.addEventListener('mousedown', (e)=>{
-  const rect = editCanvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-  isDragging = true;
-  start = {x,y};
-  dragStart = start;
-});
-
-window.addEventListener('mousemove', (e)=>{
-  if(!isDragging || !start) return;
-  const rect = editCanvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-  const sx = Math.max(0, Math.min(start.x, x));
-  const sy = Math.max(0, Math.min(start.y, y));
-  const ex = Math.max(start.x, x);
-  const ey = Math.max(start.y, y);
-
-  // convert display coords back to natural image coordinates
-  const dispScaleX = editCanvas.width / currentImageBitmap.width;
-  const dispScaleY = editCanvas.height / currentImageBitmap.height;
-  currentCrop = {
-    x: Math.floor(sx / dispScaleX),
-    y: Math.floor(sy / dispScaleY),
-    w: Math.max(1, Math.floor((ex - sx) / dispScaleX)),
-    h: Math.max(1, Math.floor((ey - sy) / dispScaleY))
-  };
-  drawEditorCanvas();
-});
-
-window.addEventListener('mouseup', ()=>{ if(isDragging) { isDragging=false; start=null; } });
-
-/* Keep aspect ratio logic: if user toggles keepAspect, changes to one size field update the other */
-resizeW.addEventListener('input', ()=>{ if(keepAspect.checked && currentImageBitmap){ resizeH.value = Math.round(Number(resizeW.value) / naturalAspect); } });
-resizeH.addEventListener('input', ()=>{ if(keepAspect.checked && currentImageBitmap){ resizeW.value = Math.round(Number(resizeH.value) * naturalAspect); } });
-
-/* Dynamic preview filter changes */
-editBrightness.addEventListener('input', drawEditorCanvas);
-editContrast.addEventListener('input', drawEditorCanvas);
-
-/* Close editor (does not save edits) */
-closeEditor.addEventListener('click', ()=>{ imgEditor.style.display='none'; cropRectEl.style.display='none'; });
-
-/* Reset crop to full image and reset resize box to image natural size */
-resetCrop.addEventListener('click', ()=>{ if(!currentImageBitmap) return; currentCrop = { x:0, y:0, w:currentImageBitmap.width, h:currentImageBitmap.height }; resizeW.value = currentImageBitmap.width; resizeH.value = currentImageBitmap.height; drawEditorCanvas(); });
-
-/* Apply crop & edits:
-   - Read currentCrop, resize fields, brightness/contrast and store in imageEdits map
-   - Later when merging images to PDF we read imageEdits to process each image accordingly
-*/
-applyCrop.addEventListener('click', ()=>{
-  const input = byId('imgmergeFiles');
-  const file = (input.files || [])[currentEditIndex];
-  if(!file) return;
-  const key = file.name + '__' + file.lastModified;
-  const edit = {
-    crop: Object.assign({}, currentCrop),
-    resize: { w: Number(resizeW.value), h: Number(resizeH.value) },
-    brightness: Number(editBrightness.value)/100,
-    contrast: Number(editContrast.value)/100
-  };
-  imageEdits.set(key, edit);
-  imgEditor.style.display='none';
-  cropRectEl.style.display='none';
-  renderOverlayPreviewFromInput(); // refresh preview for edited image
 });
 
 /* ---------- helpers ---------- */
