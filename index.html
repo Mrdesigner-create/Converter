@@ -1672,7 +1672,9 @@ async function doMergeAnyFileToPdf(){
     const pdfBytes = await pdfDoc.save();
     
     // Use 'All-in-one-merge' for the default filename
-    const filename = 'all-in-one-merge.pdf';
+   
+/*-============Auto File name  ===========*/
+    const filename = 'All-in-one-merge.pdf';
     const mime = 'application/pdf';
     
     const endTime = performance.now();
@@ -2028,3 +2030,4 @@ function saveBlob(blob, filename){
   </script>
 </body>
 </html>
+
